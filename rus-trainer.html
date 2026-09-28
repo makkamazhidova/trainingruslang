@@ -1,0 +1,1398 @@
+<!doctype html>
+<html lang="ru">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Тренажёр по русскому языку · ЕНТ</title>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Onest:wght@400;500;600;700;800&family=Lora:ital,wght@0,400;0,500;0,600;1,400&display=swap">
+<style>
+html,body{margin:0;padding:0;}
+.rt *{box-sizing:border-box;}
+.rt{
+  --brand:#5364af; --brand-deep:#3d4a8f; --brand-050:#eef0f9; --brand-100:#dde1f3;
+  --ink:#22263f; --muted:#5c6178; --line:#e4e5ee; --paper:#f3f4f8; --surface:#fff;
+  --ok:#1f9d6b; --ok-bg:#e8f6ef; --err:#d5604a; --err-bg:#fbede8;
+  --teal:#e7f4ee; --teal-t:#137a51; --coral:#fbede7; --coral-t:#b0472c;
+  font-family:'Onest',system-ui,sans-serif;color:var(--ink);
+  background:var(--paper);min-height:100vh;width:100%;-webkit-font-smoothing:antialiased;
+}
+.rt-serif{font-family:'Lora',Georgia,serif;}
+.rt-wrap{max-width:860px;margin:0 auto;padding:24px 18px 72px;}
+.rt-top{display:flex;align-items:center;justify-content:space-between;gap:12px;margin-bottom:22px;}
+.rt-logo{font-weight:800;font-size:18px;letter-spacing:-.01em;}
+.rt-logo b{color:var(--brand);}
+.rt-back{border:none;background:none;color:var(--muted);font:inherit;font-size:14px;font-weight:600;cursor:pointer;padding:6px;}
+.rt-back:hover{color:var(--ink);}
+
+.rt-h1{font-size:27px;font-weight:800;letter-spacing:-.02em;margin:0 0 6px;line-height:1.15;}
+.rt-lead{color:var(--muted);font-size:15px;margin:0 0 24px;line-height:1.5;max-width:56ch;}
+
+/* course */
+.rt-topics{display:grid;grid-template-columns:repeat(auto-fill,minmax(200px,1fr));gap:10px;}
+.rt-topic{background:var(--surface);border:1px solid var(--line);border-radius:11px;padding:14px 15px;text-align:left;font:inherit;color:inherit;cursor:default;position:relative;}
+.rt-topic.ready{cursor:pointer;border-color:var(--brand-100);}
+.rt-topic.ready::before{content:"";position:absolute;left:0;top:0;bottom:0;width:3px;background:var(--brand);border-radius:11px 0 0 11px;}
+.rt-topic.ready:hover{border-color:var(--brand);transform:translateY(-1px);transition:.15s;}
+.rt-topic .name{font-size:15px;font-weight:600;}
+.rt-topic .meta{font-size:12px;color:var(--muted);margin-top:3px;}
+.rt-topic.ready .meta{color:var(--brand);font-weight:600;}
+
+/* setup */
+.rt-card{background:var(--surface);border:1px solid var(--line);border-radius:16px;padding:26px;}
+.rt-setup-h{font-size:14px;font-weight:700;margin:0 0 12px;}
+.rt-setup-h:not(:first-child){margin-top:26px;}
+.rt-choices{display:flex;gap:10px;flex-wrap:wrap;}
+.rt-choice{padding:11px 18px;border:1.5px solid var(--line);border-radius:10px;background:var(--surface);font:inherit;font-size:15px;font-weight:600;cursor:pointer;transition:.12s;}
+.rt-choice:hover{border-color:var(--brand);}
+.rt-choice.sel{border-color:var(--brand);background:var(--brand-050);color:var(--brand-deep);}
+.rt-choice .sub{display:block;font-size:12px;font-weight:500;color:var(--muted);margin-top:2px;}
+.rt-choice.sel .sub{color:var(--brand-deep);}
+.rt-start{margin-top:28px;width:100%;border:none;background:var(--brand);color:#fff;font:inherit;font-weight:700;font-size:16px;padding:15px;border-radius:12px;cursor:pointer;transition:.12s;}
+.rt-start:hover{background:var(--brand-deep);}
+.rt-start:disabled{background:#c3c7dd;cursor:default;}
+.rt-choice.soon{opacity:.5;cursor:default;}
+.rt-choice.soon .sub{color:var(--muted);}
+
+/* quiz */
+.rt-prog{display:flex;align-items:center;gap:12px;margin-bottom:20px;}
+.rt-bar{flex:1;height:6px;background:var(--line);border-radius:99px;overflow:hidden;}
+.rt-bar i{display:block;height:100%;background:var(--brand);border-radius:99px;transition:width .35s cubic-bezier(.4,0,.2,1);}
+.rt-num{font-size:13px;font-weight:600;color:var(--muted);white-space:nowrap;}
+
+.rt-q{background:var(--surface);border:1px solid var(--line);border-radius:16px;padding:24px;}
+.rt-tags{display:flex;gap:7px;margin-bottom:14px;flex-wrap:wrap;}
+.rt-tag{font-size:11.5px;font-weight:600;padding:3px 9px;border-radius:99px;background:var(--brand-050);color:var(--brand-deep);}
+.rt-tag.lvl{background:var(--paper);color:var(--muted);}
+.rt-ctx{background:var(--paper);border-left:3px solid var(--brand);border-radius:0 8px 8px 0;padding:12px 14px;margin-bottom:14px;font-family:'Lora',serif;font-size:16px;font-style:italic;color:var(--ink);}
+.rt-prompt{font-size:18px;font-weight:600;line-height:1.4;margin:0 0 18px;letter-spacing:-.01em;}
+
+.rt-opts{display:flex;flex-direction:column;gap:9px;}
+.rt-opt{display:flex;align-items:center;gap:12px;padding:13px 15px;border:1.5px solid var(--line);border-radius:10px;background:var(--surface);cursor:pointer;font:inherit;font-size:16px;text-align:left;transition:.12s;width:100%;}
+.rt-opt .mk{width:20px;height:20px;border:2px solid var(--line);flex:none;transition:.12s;}
+.rt-opt.rad .mk{border-radius:50%;}
+.rt-opt.chk .mk{border-radius:5px;}
+.rt-opt:hover:not(:disabled){border-color:var(--brand);}
+.rt-opt.sel{border-color:var(--brand);background:var(--brand-050);}
+.rt-opt.sel .mk{border-color:var(--brand);background:var(--brand);box-shadow:inset 0 0 0 3px #fff;}
+.rt-opt.sel.chk .mk{box-shadow:none;background:var(--brand);}
+.rt-opt.ok{border-color:var(--ok);background:var(--ok-bg);}
+.rt-opt.ok .mk{border-color:var(--ok);background:var(--ok);box-shadow:inset 0 0 0 3px #fff;}
+.rt-opt.ok.chk .mk{box-shadow:none;}
+.rt-opt.bad{border-color:var(--err);background:var(--err-bg);}
+.rt-opt.bad .mk{border-color:var(--err);background:var(--err);box-shadow:inset 0 0 0 3px #fff;}
+.rt-opt.bad.chk .mk{box-shadow:none;}
+.rt-opt:disabled{cursor:default;}
+
+.rt-match{display:flex;flex-direction:column;gap:11px;}
+.rt-mrow{display:flex;align-items:center;gap:12px;}
+.rt-mrow .lf{font-family:'Lora',serif;font-size:17px;font-weight:600;min-width:120px;}
+.rt-mrow select{flex:1;padding:12px;border:1.5px solid var(--line);border-radius:10px;font:inherit;font-size:15px;background:var(--surface);cursor:pointer;}
+.rt-mrow select:focus{outline:none;border-color:var(--brand);}
+.rt-mrow select.ok{border-color:var(--ok);background:var(--ok-bg);}
+.rt-mrow select.bad{border-color:var(--err);background:var(--err-bg);}
+
+.rt-fb{margin-top:18px;padding:13px 15px;border-radius:10px;font-size:14.5px;font-weight:500;line-height:1.45;}
+.rt-fb.ok{background:var(--ok-bg);color:#127049;}
+.rt-fb.bad{background:var(--err-bg);color:#a53c26;}
+
+.rt-simple{font-size:15px;line-height:1.55;margin:0;}
+.rt-full{margin-top:14px;font-family:'Lora',serif;font-size:15.5px;line-height:1.65;color:#33384f;white-space:pre-line;border-top:1px solid var(--line);padding-top:14px;}
+
+/* scheme */
+.scheme{margin-top:16px;display:grid;grid-template-columns:1fr 1fr;gap:12px;}
+.scheme-col{border-radius:12px;padding:15px;}
+.scheme-col.a{background:var(--teal);}
+.scheme-col.b{background:var(--coral);}
+.scheme-h{font-weight:700;font-size:15px;margin-bottom:10px;}
+.scheme-col.a .scheme-h{color:var(--teal-t);}
+.scheme-col.b .scheme-h{color:var(--coral-t);}
+.scheme-q{font-weight:600;font-size:14.5px;margin-bottom:8px;}
+.scheme-r{font-size:13.5px;color:#3f4356;margin-bottom:6px;}
+.scheme-r.ex{font-family:'Lora',serif;font-style:italic;}
+.scheme-tip{grid-column:1/-1;background:var(--paper);border-radius:10px;padding:11px 14px;font-size:13.5px;color:var(--muted);}
+.scheme-tip b{color:var(--brand-deep);}
+
+.rt-act{margin-top:22px;display:flex;justify-content:flex-end;gap:10px;flex-wrap:wrap;}
+.rt-rule{margin-top:16px;border:1px solid var(--brand-100);border-radius:12px;padding:18px 18px 20px;background:#fbfbfe;}
+.rt-rule-cta{font-size:25px;font-weight:800;line-height:1.18;color:var(--brand);letter-spacing:-.02em;margin-bottom:14px;}
+.rt-btn{border:none;background:var(--brand);color:#fff;font:inherit;font-weight:700;font-size:15px;padding:12px 26px;border-radius:11px;cursor:pointer;transition:.12s;}
+.rt-btn:hover:not(:disabled){background:var(--brand-deep);}
+.rt-btn:disabled{background:#c3c7dd;cursor:default;}
+.rt-btn.ghost{background:transparent;color:var(--brand);}
+.rt-btn.ghost:hover{background:var(--brand-050);}
+
+/* result */
+.rt-result{background:var(--surface);border:1px solid var(--line);border-radius:16px;padding:30px;}
+.rt-score{font-size:15px;color:var(--muted);text-align:center;}
+.rt-score .big{display:block;font-size:52px;font-weight:800;letter-spacing:-.03em;color:var(--ink);margin:6px 0;}
+.rt-score .big b{color:var(--brand);}
+.rt-break{margin:26px 0 6px;}
+.rt-break h4{font-size:14px;font-weight:700;margin:0 0 14px;}
+.rt-brow{margin-bottom:14px;}
+.rt-brow-top{display:flex;justify-content:space-between;font-size:14px;margin-bottom:5px;}
+.rt-brow-top .st{font-weight:600;}
+.rt-brow-top .sc{color:var(--muted);font-weight:600;}
+.rt-brow-bar{height:8px;background:var(--line);border-radius:99px;overflow:hidden;}
+.rt-brow-bar i{display:block;height:100%;border-radius:99px;}
+.rt-weak-note{background:var(--err-bg);color:#a53c26;border-radius:10px;padding:13px 15px;font-size:14px;margin:18px 0;line-height:1.45;}
+.rt-strong-note{background:var(--ok-bg);color:#127049;border-radius:10px;padding:13px 15px;font-size:14px;margin:18px 0;text-align:center;font-weight:500;}
+.rt-result-btns{display:flex;gap:10px;flex-wrap:wrap;margin-top:22px;}
+.rt-result-btns .rt-btn{flex:1;min-width:150px;}
+@media(max-width:560px){.scheme{grid-template-columns:1fr;}.rt-rule-cta{font-size:20px;}}
+</style>
+</head>
+<body>
+<div class="rt"><div class="rt-wrap" id="root"></div></div>
+<script>
+const VERB = {
+  id: "verb",
+  title: "Глагол",
+  subtopics: [
+    {
+      id: "vidy",
+      title: "Виды глагола",
+      rule: {
+        simple:
+          "Задай глаголу вопрос. «Что делать?» — несовершенный вид, действие ещё идёт (читать). «Что сделать?» — совершенный вид, дело закончено (прочитать).",
+        full:
+          "Вид глагола показывает, как протекает действие.\n\nНесовершенный вид — действие длится, повторяется или не завершено; вопрос «что делать?»: читать, писать, решать. Есть все три времени: читаю, читал, буду читать.\n\nСовершенный вид — действие завершено, есть результат; вопрос «что сделать?»: прочитать, написать, решить. Настоящего времени нет — только прошедшее (прочитал) и будущее (прочитаю).\n\nМногие глаголы образуют видовые пары: решать — решить, писать — написать.",
+        scheme: "vidy",
+      },
+      questions: [
+        { id: "vd1", type: "single", mode: "theory", level: "A",
+          prompt: "На какой вопрос отвечает глагол совершенного вида?",
+          options: ["что делать?", "что сделать?", "какой?", "что?"],
+          correct: 1, answerText: "что сделать?" },
+        { id: "vd2", type: "single", mode: "theory", level: "B",
+          prompt: "У глаголов какого вида нет формы настоящего времени?",
+          options: ["несовершенного", "совершенного", "у обоих есть", "ни у одного"],
+          correct: 1, answerText: "совершенного",
+          explain: "Совершенный вид — про законченное действие, поэтому «сейчас» его не скажешь: «прочитал» — уже, «прочитаю» — потом, а «прочитаю сейчас» не бывает." },
+        { id: "vd3", type: "single", mode: "practice", level: "A",
+          prompt: "Укажите глагол совершенного вида.",
+          options: ["читать", "прочитать", "писать", "бежать"],
+          correct: 1, answerText: "прочитать" },
+        { id: "vd4", type: "multi", mode: "practice", level: "B",
+          prompt: "Отметьте все глаголы несовершенного вида.",
+          options: ["думать", "сделать", "идти", "написать", "рисовать", "прыгнуть"],
+          correct: [0, 2, 4], answerText: "думать, идти, рисовать" },
+        { id: "vd5", type: "context", mode: "practice", level: "B",
+          context: "Он долго решал задачу и наконец решил её.",
+          prompt: "Какого вида глагол «решал»?",
+          options: ["совершенного", "несовершенного", "двувидовой", "определить нельзя"],
+          correct: 1, answerText: "несовершенного",
+          explain: "«Долго решал» — действие тянулось, ещё не закончено (что делал?). А «решил» рядом — уже готово (что сделал?)." },
+        { id: "vd6", type: "match", mode: "practice", level: "C",
+          prompt: "Определите вид глагола.",
+          lefts: ["прочитать", "читать"],
+          matchOptions: ["совершенный", "несовершенный", "переходный", "возвратный"],
+          matchCorrect: [0, 1],
+          answerText: "прочитать — совершенный, читать — несовершенный",
+          explain: "«Переходный» и «возвратный» — это другие признаки глагола, здесь они лишние. Спрашивают только про вид: что сделать? (прочитать) и что делать? (читать)." },
+      ],
+    },
+    {
+      id: "perehod",
+      title: "Переходность",
+      rule: {
+        simple:
+          "Проверь: можно ли поставить после глагола слово в винительном падеже без предлога (вижу кого? что?). «Читать (что?) книгу» — переходный. «Идти» — нельзя «идти кого/что», значит непереходный.",
+        full:
+          "Переходные глаголы обозначают действие, которое переходит на предмет. При них есть или может быть прямое дополнение — существительное в винительном падеже без предлога: строить (что?) дом, любить (кого?) маму.\n\nНепереходные глаголы прямого дополнения при себе иметь не могут: идти, спать, радоваться.\n\nВажно: все возвратные глаголы (на -ся) — непереходные.",
+      },
+      questions: [
+        { id: "ph1", type: "single", mode: "theory", level: "A",
+          prompt: "Переходный глагол сочетается с существительным в каком падеже без предлога?",
+          options: ["родительном", "винительном", "дательном", "творительном"],
+          correct: 1, answerText: "винительном" },
+        { id: "ph2", type: "single", mode: "theory", level: "B",
+          prompt: "Какие глаголы всегда непереходные?",
+          options: ["глаголы движения", "возвратные (на -ся)", "глаголы совершенного вида", "глаголы будущего времени"],
+          correct: 1, answerText: "возвратные (на -ся)" },
+        { id: "ph3", type: "single", mode: "practice", level: "A",
+          prompt: "Укажите переходный глагол.",
+          options: ["спать", "читать", "бежать", "сидеть"],
+          correct: 1, answerText: "читать (что?) книгу" },
+        { id: "ph4", type: "multi", mode: "practice", level: "B",
+          prompt: "Отметьте все переходные глаголы.",
+          options: ["строить", "гулять", "любить", "смеяться", "видеть", "расти"],
+          correct: [0, 2, 4], answerText: "строить, любить, видеть" },
+        { id: "ph5", type: "context", mode: "practice", level: "B",
+          context: "Мальчик читает интересную книгу.",
+          prompt: "Найдите глагол в предложении. Он переходный или непереходный?",
+          options: ["переходный", "непереходный", "нельзя определить", "возвратный"],
+          correct: 0, answerText: "переходный",
+          explain: "После глагола есть прямое дополнение «книгу» — винительный падеж без предлога (читает что? книгу). Значит глагол переходный." },
+        { id: "ph6", type: "match", mode: "practice", level: "C",
+          prompt: "Определите переходность глагола.",
+          lefts: ["строить", "сидеть"],
+          matchOptions: ["переходный", "непереходный", "совершенный", "возвратный"],
+          matchCorrect: [0, 1],
+          answerText: "строить — переходный, сидеть — непереходный",
+          explain: "«Совершенный» и «возвратный» — другие признаки, здесь лишние. Строить (что?) дом — переходный; у «сидеть» прямого дополнения нет — непереходный." },
+      ],
+    },
+    {
+      id: "vozvrat",
+      title: "Возвратность",
+      rule: {
+        simple:
+          "Смотри на конец слова. Есть -ся или -сь — глагол возвратный (умываться, учиться). Нет — невозвратный (умывать, учить).",
+        full:
+          "Возвратные глаголы имеют на конце постфикс -ся или -сь: умываться, смеяться, учиться, оделся.\n\nНевозвратные глаголы постфикса -ся не имеют: умывать, учить, читать.\n\nЧасто возвратность показывает, что действие направлено на самого себя (умываться = умывать себя) или происходит взаимно (обниматься, встречаться).\n\nВсе возвратные глаголы — непереходные.",
+      },
+      questions: [
+        { id: "vz1", type: "single", mode: "theory", level: "A",
+          prompt: "По какому признаку узнают возвратный глагол?",
+          options: ["по приставке", "по постфиксу -ся (-сь)", "по окончанию -ть", "по ударению"],
+          correct: 1, answerText: "по постфиксу -ся (-сь)" },
+        { id: "vz2", type: "single", mode: "practice", level: "A",
+          prompt: "Укажите возвратный глагол.",
+          options: ["гулять", "смеяться", "читать", "бежать"],
+          correct: 1, answerText: "смеяться" },
+        { id: "vz3", type: "multi", mode: "practice", level: "B",
+          prompt: "Отметьте все возвратные глаголы.",
+          options: ["одеваться", "писать", "учиться", "думать", "встречаться", "рисовать"],
+          correct: [0, 2, 4], answerText: "одеваться, учиться, встречаться" },
+        { id: "vz4", type: "context", mode: "practice", level: "B",
+          context: "Дети весело смеялись на перемене.",
+          prompt: "Найдите глагол в предложении. Он возвратный?",
+          options: ["да, возвратный", "нет, невозвратный", "нельзя определить", "это переходный глагол"],
+          correct: 0, answerText: "да, возвратный (смеяться — есть -ся)" },
+        { id: "vz5", type: "match", mode: "practice", level: "C",
+          prompt: "Определите возвратность глагола.",
+          lefts: ["умываться", "умывать"],
+          matchOptions: ["возвратный", "невозвратный", "возвратное деепричастие", "переходный"],
+          matchCorrect: [0, 1],
+          answerText: "умываться — возвратный, умывать — невозвратный",
+          explain: "Смотри на -ся: умываться (с -ся) — возвратный глагол, умывать (без -ся) — невозвратный. Ловушка — «возвратное деепричастие»: у него тоже есть -ся (умываясь), но умываться — это глагол в начальной форме, а не деепричастие. «Переходный» здесь тоже лишний." },
+      ],
+    },
+    { id: "vremya", title: "Время", questions: [] },
+    { id: "naklonenie", title: "Наклонение", questions: [] },
+    {
+      id: "spr",
+      title: "Спряжение (1,2)",
+      rule: {
+        simple:
+          "Смотри на -ить в начальной форме. Глаголы на -ить — II спряжение (строить, любить). Почти все остальные — I спряжение (читать, играть). Отдельно стоят разноспрягаемые: хотеть, бежать.",
+        full:
+          "Спряжение — изменение глагола по лицам и числам. Спряжений два.\n\nКо II спряжению относятся все глаголы на -ить (строить, любить, говорить), кроме брить, стелить. Плюс 11 глаголов-исключений: смотреть, видеть, ненавидеть, терпеть, обидеть, вертеть, зависеть, а также гнать, держать, слышать, дышать.\n\nК I спряжению относятся остальные глаголы: читать, играть, рисовать, писать.\n\nОсобо стоят разноспрягаемые глаголы: хотеть, бежать — они изменяются частично по I, частично по II спряжению.\n\nЛичные окончания: I спр. — гласная Е, -ут/-ют; II спр. — гласная И, -ат/-ят.",
+        scheme: "spr",
+      },
+      questions: [
+        { id: "sp1", type: "single", mode: "theory", level: "A",
+          prompt: "Глаголы на -ить (кроме исключений) относятся к какому спряжению?",
+          options: ["I спряжению", "II спряжению", "разноспрягаемые", "безличные"],
+          correct: 1, answerText: "II спряжению" },
+        { id: "sp2", type: "single", mode: "theory", level: "B",
+          prompt: "Какой глагол является разноспрягаемым?",
+          options: ["читать", "строить", "хотеть", "играть"],
+          correct: 2, answerText: "хотеть" },
+        { id: "sp3", type: "single", mode: "practice", level: "A",
+          prompt: "Укажите глагол II спряжения.",
+          options: ["читать", "строить", "играть", "гулять"],
+          correct: 1, answerText: "строить (на -ить)" },
+        { id: "sp4", type: "multi", mode: "practice", level: "B",
+          prompt: "Отметьте все глаголы I спряжения.",
+          options: ["писать", "любить", "играть", "строить", "рисовать", "говорить"],
+          correct: [0, 2, 4], answerText: "писать, играть, рисовать",
+          explain: "Глаголы на -ить — II спряжение (любить, строить, говорить). Остальные — I спряжение: писать, играть, рисовать." },
+        { id: "sp5", type: "match", mode: "practice", level: "C",
+          prompt: "Установите соответствие: глагол и спряжение.",
+          lefts: ["читать", "строить"],
+          matchOptions: ["I спряжение", "II спряжение", "разноспрягаемый", "безличный"],
+          matchCorrect: [0, 1],
+          answerText: "читать — I спряжение, строить — II спряжение",
+          explain: "Строить — на -ить, значит II спряжение. Читать — не на -ить и не исключение, значит I спряжение. «Разноспрягаемый» и «безличный» здесь лишние." },
+      ],
+    },
+    { id: "raznospr", title: "Разноспрягаемые", questions: [] },
+    { id: "zalog", title: "Залог", questions: [] },
+    { id: "dvizhenie", title: "Глаголы движения", questions: [] },
+  ],
+};
+
+// ── Тема «Фонетика» ───────────────────────────────────────────
+const PHONETICS = {
+  id: "phonetics",
+  title: "Фонетика",
+  subtopics: [
+    {
+      id: "zvuki-bukvy",
+      title: "Звуки и буквы",
+      rule: {
+        simple: "Звук мы слышим и произносим, букву — видим и пишем. В алфавите 33 буквы. Букв и звуков в слове бывает разное количество.",
+        full: "Звуки мы слышим и произносим, буквы — видим и пишем. В русском алфавите 33 буквы.\n\nБуквы ь и ъ звука не обозначают. Буквы е, ё, ю, я в некоторых позициях (в начале слова, после гласного, после ь и ъ) обозначают сразу два звука. Поэтому количество букв и звуков в слове часто не совпадает.",
+      },
+      questions: [
+        { id: "ph-zb1", type: "single", mode: "theory", level: "A", prompt: "Сколько букв в русском алфавите?", options: ["31", "32", "33", "34"], correct: 2, answerText: "33" },
+        { id: "ph-zb2", type: "single", mode: "theory", level: "A", prompt: "Что мы слышим и произносим?", options: ["звук", "буква", "слог", "ударение"], correct: 0, answerText: "звук" },
+        { id: "ph-zb3", type: "single", mode: "practice", level: "B", prompt: "В каком слове звуков больше, чем букв?", options: ["маяк", "мост", "конь", "стол"], correct: 0, answerText: "маяк", explain: "В слове «маяк» буква я после гласного даёт два звука [й][а]: [м-а-й-а-к] — 5 звуков и 4 буквы." },
+        { id: "ph-zb4", type: "single", mode: "practice", level: "B", prompt: "В каком слове букв больше, чем звуков?", options: ["день", "юла", "яма", "заря"], correct: 0, answerText: "день", explain: "В слове «день» буква ь звука не обозначает: [д'-э-н'] — 3 звука, 4 буквы." },
+        { id: "ph-zb5", type: "multi", mode: "practice", level: "C", prompt: "Отметьте слова, где букв и звуков поровну.", options: ["стол", "вода", "пень", "рука", "яма", "конь"], correct: [0, 1, 3], answerText: "стол, вода, рука", explain: "Поровну там, где нет ь и нет букв е, ё, ю, я в позиции двух звуков. Пень и конь — есть ь (звуков меньше), яма — я даёт два звука (звуков больше)." },
+      ],
+    },
+    {
+      id: "soglasnye",
+      title: "Согласные: мягкие и твёрдые, звонкие и глухие",
+      rule: {
+        simple: "Твёрдость и мягкость: мягкость показывают ь и буквы е, ё, ю, я, и после согласного (мел — мягкий [м']). Звонкие произносим с голосом (б, в, г, д, ж, з), глухие — без голоса (п, ф, к, т, ш, с).",
+        full: "Согласные различают по двум признакам.\n\nТвёрдые и мягкие: большинство образует пары (л — ль). Мягкость обозначают ь и гласные е, ё, ю, я, и после согласного. Всегда твёрдые: ж, ш, ц. Всегда мягкие: ч, щ, й.\n\nЗвонкие и глухие: звонкие произносятся с голосом (б, в, г, д, ж, з…), глухие — без голоса (п, ф, к, т, ш, с…). Пары: б—п, в—ф, г—к, д—т, ж—ш, з—с. Сонорные (л, м, н, р, й) — всегда звонкие, пары не имеют.",
+        scheme: "soglasnye",
+      },
+      questions: [
+        { id: "ph-sg1", type: "single", mode: "theory", level: "A", prompt: "Какие согласные всегда твёрдые?", options: ["ж, ш, ц", "ч, щ, й", "б, в, г", "л, м, н"], correct: 0, answerText: "ж, ш, ц" },
+        { id: "ph-sg2", type: "single", mode: "theory", level: "A", prompt: "Какие согласные всегда мягкие?", options: ["ч, щ, й", "ж, ш, ц", "п, ф, к", "д, т, з"], correct: 0, answerText: "ч, щ, й" },
+        { id: "ph-sg3", type: "single", mode: "theory", level: "B", prompt: "Звонкий согласный произносится…", options: ["с голосом", "без голоса", "только твёрдо", "только мягко"], correct: 0, answerText: "с голосом" },
+        { id: "ph-sg4", type: "single", mode: "practice", level: "B", prompt: "Найдите слово, где первый согласный мягкий.", options: ["мяч", "мак", "мост", "мыло"], correct: 0, answerText: "мяч", explain: "В слове «мяч» буква я показывает мягкость: [м'ач]. В остальных после м стоит а, о, ы — согласный твёрдый." },
+        { id: "ph-sg5", type: "multi", mode: "practice", level: "B", prompt: "Отметьте слова, которые начинаются с глухого согласного.", options: ["тень", "дом", "суп", "булка", "кино", "звон"], correct: [0, 2, 4], answerText: "тень, суп, кино", explain: "Глухие т, с, к произносятся без голоса. Д, б, з — звонкие." },
+        { id: "ph-sg6", type: "match", mode: "practice", level: "C", prompt: "Установите соответствие: звонкий согласный — его глухая пара.", lefts: ["б", "з"], matchOptions: ["п", "с", "м", "р"], matchCorrect: [0, 1], answerText: "б — п, з — с", explain: "Пары по глухости: б—п, з—с. Буквы м и р — сонорные, глухой пары не имеют, поэтому здесь лишние." },
+      ],
+    },
+    {
+      id: "glasnye",
+      title: "Гласные: ударные и безударные",
+      rule: {
+        simple: "Гласный под ударением слышится ясно (во́ды) — он ударный. Без ударения звучит слабо (вода́) — он безударный, его надо проверять.",
+        full: "Гласные бывают ударные и безударные.\n\nУдарный гласный стоит под ударением и слышится чётко: до́м, во́ды. Безударный стоит не под ударением и часто звучит неясно: вода́, гора́.\n\nБезударный гласный в корне проверяют ударением — подбирают родственное слово, где он становится ударным: вода́ — во́ды, гора́ — го́ры.",
+      },
+      questions: [
+        { id: "ph-gl1", type: "single", mode: "theory", level: "A", prompt: "Какой гласный слышится ясно и чётко?", options: ["ударный", "безударный", "мягкий", "глухой"], correct: 0, answerText: "ударный" },
+        { id: "ph-gl2", type: "single", mode: "practice", level: "A", prompt: "В каком слове гласная в корне безударная?", options: ["дом", "стол", "вода", "сад"], correct: 2, answerText: "вода", explain: "В слове «вода́» ударение падает на второй слог, значит первый гласный безударный: его проверяем — во́ды." },
+        { id: "ph-gl3", type: "single", mode: "practice", level: "B", prompt: "Каким словом проверим безударную гласную в слове «гора»?", options: ["горе́ть", "го́ры", "горо́д", "гори́стый"], correct: 1, answerText: "го́ры", explain: "Проверочное слово — то, где гласная под ударением и корень тот же: го́ры." },
+        { id: "ph-gl4", type: "multi", mode: "practice", level: "C", prompt: "Отметьте слова с безударной гласной в корне.", options: ["река", "стол", "трава", "дом", "гора"], correct: [0, 2, 4], answerText: "река, трава, гора", explain: "Безударная в корне там, где ударение не на этом гласном: река́ (ре́ки), трава́ (тра́вы), гора́ (го́ры). Стол, дом — гласный под ударением." },
+      ],
+    },
+    {
+      id: "slogi",
+      title: "Слоги",
+      rule: {
+        simple: "Сколько в слове гласных — столько и слогов. Ма-ши-на — 3 гласных, 3 слога.",
+        full: "Слог — это часть слова, которую произносят одним толчком воздуха. В слоге обязательно есть гласный.\n\nСколько в слове гласных звуков, столько и слогов: дом — 1 слог, ма-ши-на — 3 слога. Слова делятся на слоги для переноса и при чтении.",
+      },
+      questions: [
+        { id: "ph-sl1", type: "single", mode: "theory", level: "A", prompt: "Сколько слогов в слове, если в нём три гласных?", options: ["один", "два", "три", "четыре"], correct: 2, answerText: "три", explain: "Число слогов равно числу гласных: три гласных — три слога." },
+        { id: "ph-sl2", type: "single", mode: "practice", level: "A", prompt: "Сколько слогов в слове «книга»?", options: ["один", "два", "три", "четыре"], correct: 1, answerText: "два", explain: "Гласные в слове — и, а (два), значит два слога: кни-га." },
+        { id: "ph-sl3", type: "single", mode: "practice", level: "B", prompt: "В каком слове три слога?", options: ["стол", "машина", "окно", "дом"], correct: 1, answerText: "машина", explain: "Ма-ши-на — три гласных (а, и, а), три слога. Окно — два, стол и дом — один." },
+        { id: "ph-sl4", type: "single", mode: "practice", level: "B", prompt: "Сколько слогов в слове «урожай»?", options: ["два", "три", "четыре", "один"], correct: 1, answerText: "три", explain: "У-ро-жай: гласные у, о, а — три гласных, три слога (й — согласный)." },
+      ],
+    },
+    {
+      id: "udarenie",
+      title: "Ударение",
+      rule: {
+        simple: "Ударение — это выделение одного слога голосом. В русском языке оно может падать на любой слог и менять смысл: за́мок — замо́к.",
+        full: "Ударение — выделение одного из слогов силой голоса. В русском языке ударение свободное: может падать на любой слог (кни́га, окно́, молоко́).\n\nУдарение бывает смыслоразличительным: за́мок (здание) — замо́к (на двери), му́ка — мука́. Ударный слог в слове всегда только один.",
+      },
+      questions: [
+        { id: "ph-ud1", type: "single", mode: "theory", level: "A", prompt: "Что такое ударение?", options: ["выделение слога голосом", "деление на слоги", "мягкость согласного", "знак в конце слова"], correct: 0, answerText: "выделение слога голосом" },
+        { id: "ph-ud2", type: "single", mode: "theory", level: "B", prompt: "Сколько ударных слогов может быть в одном слове?", options: ["один", "два", "сколько угодно", "ни одного"], correct: 0, answerText: "один" },
+        { id: "ph-ud3", type: "single", mode: "practice", level: "B", prompt: "В какой паре ударение меняет смысл слова?", options: ["за́мок — замо́к", "дом — дома", "стол — столы", "рука — руки"], correct: 0, answerText: "за́мок — замо́к", explain: "За́мок (здание) и замо́к (на двери) различаются только ударением — это разные слова." },
+        { id: "ph-ud4", type: "single", mode: "practice", level: "B", prompt: "В каком слове ударение на втором слоге?", options: ["кни́га", "окно́", "го́род", "со́лнце"], correct: 1, answerText: "окно́", explain: "Окно́ — голосом выделяется второй слог (-но). В остальных ударение на первом слоге." },
+      ],
+    },
+    {
+      id: "oglushenie",
+      title: "Оглушение и озвончение",
+      rule: {
+        simple: "Звонкий согласный на конце слова и перед глухим оглушается — звучит как глухой: дуб → [дуп], ложка → [лошка]. Проверяй гласным: дубы, ложечка.",
+        full: "В некоторых позициях парные согласные меняют звучание.\n\nОглушение: звонкий согласный на конце слова или перед глухим произносится как парный глухой: дуб → [дуп], сказка → [скаска].\n\nОзвончение: глухой перед звонким произносится как парный звонкий: просьба → [про́з'ба], косьба → [каз'ба].\n\nНа письме букву проверяют: ставят после согласного гласный или сонорный — дуб → дубы́, сказка → сказа́ть.",
+      },
+      questions: [
+        { id: "ph-og1", type: "single", mode: "theory", level: "A", prompt: "Что происходит со звонким согласным на конце слова?", options: ["оглушается", "озвончается", "исчезает", "удваивается"], correct: 0, answerText: "оглушается" },
+        { id: "ph-og2", type: "single", mode: "practice", level: "B", prompt: "В каком слове происходит оглушение согласного?", options: ["дуб", "дома", "рука", "вода"], correct: 0, answerText: "дуб", explain: "На конце слова «дуб» звонкий б звучит как глухой [п]: [дуп]. Проверка — дубы́." },
+        { id: "ph-og3", type: "single", mode: "practice", level: "B", prompt: "Как проверить согласную в слове «ложка»?", options: ["ложечка", "ложись", "ложный", "лёгкий"], correct: 0, answerText: "ложечка", explain: "После сомнительного согласного ставим гласный: ло́жечка — ясно слышно ж. В слове «ложка» ж оглушается в [ш]." },
+        { id: "ph-og4", type: "single", mode: "practice", level: "C", prompt: "В слове «просьба» буква с звучит как…", options: ["з", "с", "ц", "ш"], correct: 0, answerText: "з", explain: "Глухой с перед звонким б озвончается и звучит как [з]: [про́з'ба]. Это озвончение." },
+      ],
+    },
+    {
+      id: "orfoepiya",
+      title: "Орфоэпические нормы",
+      rule: {
+        simple: "Орфоэпия — это правильное произношение и ударение. Например: зво́нит — неверно, звони́т — верно; то́рты — не «торты́», краси́вее — не «красиве́е».",
+        full: "Орфоэпические нормы — правила правильного произношения слов и постановки ударения.\n\nЧасто ошибаются в ударении: звони́т (не зво́нит), краси́вее (не красиве́е), то́рты (не торты́), догово́р, катало́г, свёкла, ба́нты.\n\nСоблюдать орфоэпию важно для грамотной устной речи.",
+      },
+      questions: [
+        { id: "ph-or1", type: "single", mode: "theory", level: "A", prompt: "Что изучают орфоэпические нормы?", options: ["правильное произношение и ударение", "правописание букв", "знаки препинания", "состав слова"], correct: 0, answerText: "правильное произношение и ударение" },
+        { id: "ph-or2", type: "single", mode: "practice", level: "B", prompt: "Где ударение поставлено верно?", options: ["звони́т", "зво́нит", "зво́ните", "зво́нишь"], correct: 0, answerText: "звони́т", explain: "В глаголе «звонить» ударение всегда на окончании: звони́т, звони́шь, звони́м." },
+        { id: "ph-or3", type: "single", mode: "practice", level: "B", prompt: "В каком слове ударение верное?", options: ["то́рты", "торты́", "торта́", "тортьі"], correct: 0, answerText: "то́рты", explain: "Во множественном числе — то́рты, то́ртов. Ударение остаётся на первом слоге." },
+        { id: "ph-or4", type: "single", mode: "practice", level: "B", prompt: "Выберите верный вариант.", options: ["краси́вее", "красиве́е", "красиве́й", "красиве́йше"], correct: 0, answerText: "краси́вее", explain: "В сравнительной степени ударение на -и-: краси́вее." },
+      ],
+    },
+    {
+      id: "eyoyuya",
+      title: "Буквы Е, Ё, Ю, Я",
+      rule: {
+        simple: "Буквы е, ё, ю, я дают два звука ([й] + гласный) в начале слова, после гласного и после ь/ъ: яма [й-а-ма], поёт, объявление. После согласного — один звук и мягкость: мяч [м'ач].",
+        full: "Буквы е, ё, ю, я могут обозначать один или два звука.\n\nДва звука ([й'э], [й'о], [й'у], [й'а]) — в трёх позициях: в начале слова (яма, ель), после гласного (поёт, маяк), после ь или ъ (объявление, вьюга).\n\nОдин звук и мягкость предыдущего согласного — после согласной буквы: мяч [м'ач], лес [л'эс], люк [л'ук].",
+      },
+      questions: [
+        { id: "ph-ey1", type: "single", mode: "theory", level: "A", prompt: "Сколько звуков даёт буква я в начале слова?", options: ["один", "два", "три", "ни одного"], correct: 1, answerText: "два" },
+        { id: "ph-ey2", type: "single", mode: "practice", level: "B", prompt: "В каком слове буква ю обозначает два звука?", options: ["юла", "люк", "клюв", "тюль"], correct: 0, answerText: "юла", explain: "В начале слова «юла» ю = [й][у]: [й-у-л-а]. После согласного (люк) ю даёт один звук и мягкость." },
+        { id: "ph-ey3", type: "multi", mode: "practice", level: "B", prompt: "Отметьте слова, где буква е обозначает два звука.", options: ["ель", "лес", "поехал", "мел", "въезд"], correct: [0, 2, 4], answerText: "ель, поехал, въезд", explain: "Два звука — в начале слова (ель), после гласного (поехал), после ъ (въезд). После согласного (лес, мел) — один звук и мягкость." },
+        { id: "ph-ey4", type: "single", mode: "practice", level: "C", prompt: "Сколько звуков в слове «ёж»?", options: ["два", "три", "один", "четыре"], correct: 1, answerText: "три", explain: "Ё в начале слова = [й][о], плюс [ш] (ж оглушается): [й-о-ш] — 3 звука при 2 буквах." },
+      ],
+    },
+    {
+      id: "znaki",
+      title: "Функции Ь и Ъ",
+      rule: {
+        simple: "Ь смягчает согласный (день) или разделяет (вьюга). Ъ только разделяет — после приставки перед е, ё, ю, я (объявление, съел). Звука эти буквы не дают.",
+        full: "Буквы ь и ъ звуков не обозначают.\n\nМягкий знак (ь): 1) показывает мягкость согласного — день, соль; 2) разделяет согласный и гласные е, ё, ю, я, и — вьюга, соловьи; 3) пишется в некоторых грамматических формах — рожь, читаешь.\n\nТвёрдый знак (ъ): только разделительный — пишется после приставки на согласный перед е, ё, ю, я: объявление, съезд, подъём.",
+      },
+      questions: [
+        { id: "ph-zn1", type: "single", mode: "theory", level: "A", prompt: "Какой звук обозначает буква ь?", options: ["никакого", "гласный", "твёрдый согласный", "два звука"], correct: 0, answerText: "никакого" },
+        { id: "ph-zn2", type: "single", mode: "theory", level: "B", prompt: "Разделительный ъ пишется…", options: ["после приставки перед е, ё, ю, я", "в конце слова", "между двумя гласными", "после шипящих"], correct: 0, answerText: "после приставки перед е, ё, ю, я" },
+        { id: "ph-zn3", type: "single", mode: "practice", level: "B", prompt: "В каком слове пишется твёрдый знак (ъ)?", options: ["объявление", "вьюга", "семья", "льёт"], correct: 0, answerText: "объявление", explain: "Ъ пишется после приставки об- перед я: объявление. В остальных — разделительный ь." },
+        { id: "ph-zn4", type: "single", mode: "practice", level: "B", prompt: "Какую роль выполняет ь в слове «день»?", options: ["смягчает согласный", "разделяет", "обозначает звук", "показывает ударение"], correct: 0, answerText: "смягчает согласный", explain: "В слове «день» ь смягчает н: [д'эн']. Разделительную роль он играет только перед е, ё, ю, я, и (вьюга)." },
+      ],
+    },
+  ],
+};
+
+// ── Тема «Существительное» ─────────────────────────────────────
+const NOUN = {
+  id: "noun",
+  title: "Существительное",
+  subtopics: [
+    {
+      id: "n-vidy",
+      title: "Виды",
+      rule: {
+        simple: "Существительные бывают: собственные (имена, названия — Астана, Абай) и нарицательные (общие — город, поэт); одушевлённые (кто? — человек) и неодушевлённые (что? — стол).",
+        full: "Имена существительные делятся на группы.\n\nСобственные — имена, фамилии, клички, названия: Астана, Абай, Волга. Пишутся с большой буквы. Нарицательные — общие названия предметов: город, река, поэт.\n\nОдушевлённые отвечают на вопрос кто? (человек, кот). Неодушевлённые — на вопрос что? (стол, дерево).\n\nПо значению выделяют также конкретные (стол), вещественные (молоко, золото), отвлечённые/абстрактные (радость, смелость), собирательные (листва, молодёжь).",
+      },
+      questions: [
+        { id: "n-vd1", type: "single", mode: "theory", level: "A", prompt: "На какой вопрос отвечают одушевлённые существительные?", options: ["кто?", "что?", "какой?", "чей?"], correct: 0, answerText: "кто?" },
+        { id: "n-vd2", type: "single", mode: "theory", level: "A", prompt: "Как пишутся собственные имена существительные?", options: ["с большой буквы", "с маленькой буквы", "через дефис", "всегда во множественном числе"], correct: 0, answerText: "с большой буквы" },
+        { id: "n-vd3", type: "single", mode: "practice", level: "A", prompt: "Укажите собственное существительное.", options: ["город", "Абай", "река", "поэт"], correct: 1, answerText: "Абай", explain: "Абай — имя, это собственное существительное, пишется с большой буквы. Остальные — нарицательные." },
+        { id: "n-vd4", type: "multi", mode: "practice", level: "B", prompt: "Отметьте все одушевлённые существительные.", options: ["учитель", "стол", "кошка", "камень", "мальчик", "окно"], correct: [0, 2, 4], answerText: "учитель, кошка, мальчик", explain: "Одушевлённые отвечают на вопрос кто?: учитель, кошка, мальчик. Стол, камень, окно — что? — неодушевлённые." },
+        { id: "n-vd5", type: "match", mode: "practice", level: "C", prompt: "Определите вид существительного.", lefts: ["молоко", "радость"], matchOptions: ["вещественное", "отвлечённое", "одушевлённое", "собственное"], matchCorrect: [0, 1], answerText: "молоко — вещественное, радость — отвлечённое", explain: "Молоко — вещество (вещественное). Радость — чувство, его нельзя потрогать (отвлечённое). «Одушевлённое» и «собственное» здесь лишние." },
+      ],
+    },
+    {
+      id: "n-rod",
+      title: "Род",
+      rule: {
+        simple: "Род определяем словами он, она, оно. Он, мой — мужской (стол), она, моя — женский (книга), оно, моё — средний (окно).",
+        full: "Имена существительные бывают трёх родов.\n\nМужской род — он, мой: стол, конь, дом. Женский род — она, моя: книга, земля, ночь. Средний род — оно, моё: окно, море, солнце.\n\nРод определяют, подставляя слова он/она/оно или мой/моя/моё. У существительных, которые есть только во множественном числе (ножницы, брюки), род не определяется.",
+      },
+      questions: [
+        { id: "n-rd1", type: "single", mode: "theory", level: "A", prompt: "Какими словами проверяют мужской род?", options: ["он, мой", "она, моя", "оно, моё", "они, мои"], correct: 0, answerText: "он, мой" },
+        { id: "n-rd2", type: "single", mode: "practice", level: "A", prompt: "Существительное какого рода слово «окно»?", options: ["среднего", "мужского", "женского", "общего"], correct: 0, answerText: "среднего", explain: "Окно — оно, моё → средний род." },
+        { id: "n-rd3", type: "multi", mode: "practice", level: "B", prompt: "Отметьте все существительные женского рода.", options: ["книга", "стол", "земля", "конь", "ночь", "окно"], correct: [0, 2, 4], answerText: "книга, земля, ночь", explain: "Женский род — она, моя: книга, земля, ночь. Стол, конь — мужской; окно — средний." },
+        { id: "n-rd4", type: "match", mode: "practice", level: "C", prompt: "Определите род существительного.", lefts: ["дом", "земля"], matchOptions: ["мужской", "женский", "средний", "общий"], matchCorrect: [0, 1], answerText: "дом — мужской, земля — женский", explain: "Дом — он, мой (мужской). Земля — она, моя (женский). «Средний» и «общий» здесь лишние." },
+      ],
+    },
+    {
+      id: "n-chislo",
+      title: "Число",
+      rule: {
+        simple: "Число показывает: один предмет или много. Единственное — один (стол), множественное — много (столы).",
+        full: "Число существительного показывает количество предметов.\n\nЕдинственное число — один предмет: книга, стол, дом. Множественное число — несколько: книги, столы, дома.\n\nНекоторые существительные имеют только единственное число (молоко, смелость) или только множественное (ножницы, каникулы, брюки).",
+      },
+      questions: [
+        { id: "n-ch1", type: "single", mode: "theory", level: "A", prompt: "Сколько предметов обозначает единственное число?", options: ["один", "два", "много", "ни одного"], correct: 0, answerText: "один" },
+        { id: "n-ch2", type: "single", mode: "practice", level: "A", prompt: "Укажите существительное во множественном числе.", options: ["стол", "книга", "дома", "окно"], correct: 2, answerText: "дома", explain: "Дома — несколько предметов, это множественное число. Остальные — единственное." },
+        { id: "n-ch3", type: "multi", mode: "practice", level: "B", prompt: "Отметьте существительные, у которых есть только множественное число.", options: ["ножницы", "стол", "каникулы", "книга", "брюки", "окно"], correct: [0, 2, 4], answerText: "ножницы, каникулы, брюки", explain: "Эти слова употребляются только во множественном числе: ножницы, каникулы, брюки." },
+        { id: "n-ch4", type: "single", mode: "practice", level: "B", prompt: "У какого слова есть только единственное число?", options: ["молоко", "стол", "книга", "дом"], correct: 0, answerText: "молоко", explain: "Молоко (вещество) не считают по штукам — только единственное число." },
+      ],
+    },
+    {
+      id: "n-sklonenie",
+      title: "Склонение",
+      rule: {
+        simple: "Склонение определяем по роду и окончанию в начальной форме. 1-е — м. и ж. род на -а/-я (мама, дядя). 2-е — м. род без окончания и ср. род на -о/-е (стол, окно). 3-е — ж. род на ь (ночь).",
+        full: "Склонение — тип изменения существительного по падежам. Их три.\n\n1-е склонение: существительные женского и мужского рода с окончанием -а, -я: мама, земля, дядя, папа.\n\n2-е склонение: мужской род с нулевым окончанием (стол, конь) и средний род на -о, -е (окно, море).\n\n3-е склонение: женский род с ь на конце: ночь, дочь, степь.\n\nОтдельно — разносклоняемые на -мя (время, имя) и слово путь.",
+        scheme: "skl",
+      },
+      questions: [
+        { id: "n-sk1", type: "single", mode: "theory", level: "A", prompt: "Существительные женского рода на -ь относятся к какому склонению?", options: ["1-му", "2-му", "3-му", "разносклоняемым"], correct: 2, answerText: "3-му" },
+        { id: "n-sk2", type: "single", mode: "practice", level: "A", prompt: "Укажите существительное 1-го склонения.", options: ["стол", "мама", "окно", "ночь"], correct: 1, answerText: "мама", explain: "Мама — женский род на -а → 1-е склонение." },
+        { id: "n-sk3", type: "multi", mode: "practice", level: "B", prompt: "Отметьте все существительные 2-го склонения.", options: ["стол", "земля", "окно", "ночь", "конь", "мама"], correct: [0, 2, 4], answerText: "стол, окно, конь", explain: "2-е склонение — м. род без окончания (стол, конь) и ср. род на -о/-е (окно). Земля, мама — 1-е; ночь — 3-е." },
+        { id: "n-sk4", type: "match", mode: "practice", level: "C", prompt: "Определите склонение существительного.", lefts: ["книга", "ночь"], matchOptions: ["1-е склонение", "3-е склонение", "2-е склонение", "разносклоняемое"], matchCorrect: [0, 1], answerText: "книга — 1-е, ночь — 3-е", explain: "Книга — ж. род на -а (1-е). Ночь — ж. род на ь (3-е). «2-е» и «разносклоняемое» здесь лишние." },
+      ],
+    },
+    {
+      id: "n-otglagol",
+      title: "Отглагольное сущ.",
+      rule: {
+        simple: "Отглагольное существительное образовано от глагола и называет действие как предмет: читать → чтение, бегать → бег. Отвечает на что?, но связано с действием.",
+        full: "Отглагольные существительные образованы от глаголов и обозначают действие или его результат как предмет.\n\nОбразуются чаще с суффиксами -ени-, -ани-, -к- или без суффикса: решать → решение, читать → чтение, бегать → бег, ходить → ходьба.\n\nОтвечают на вопрос что?, но сохраняют связь с действием: строительство (от строить), обучение (от учить).",
+      },
+      questions: [
+        { id: "n-og1", type: "single", mode: "theory", level: "A", prompt: "От какой части речи образовано отглагольное существительное?", options: ["от глагола", "от прилагательного", "от наречия", "от числительного"], correct: 0, answerText: "от глагола" },
+        { id: "n-og2", type: "single", mode: "practice", level: "A", prompt: "Укажите отглагольное существительное.", options: ["стол", "чтение", "красивый", "быстро"], correct: 1, answerText: "чтение", explain: "Чтение образовано от глагола читать и называет действие как предмет." },
+        { id: "n-og3", type: "multi", mode: "practice", level: "B", prompt: "Отметьте все отглагольные существительные.", options: ["бег", "дом", "решение", "книга", "строительство", "окно"], correct: [0, 2, 4], answerText: "бег, решение, строительство", explain: "Образованы от глаголов: бег (бегать), решение (решать), строительство (строить)." },
+        { id: "n-og4", type: "single", mode: "practice", level: "B", prompt: "Какое существительное образовано от глагола «учить»?", options: ["ученик", "обучение", "учебник", "учёный"], correct: 1, answerText: "обучение", explain: "Обучение называет само действие (учить → обучение) — это отглагольное существительное." },
+      ],
+    },
+    {
+      id: "n-padezhi",
+      title: "Падежные формы",
+      rule: {
+        simple: "Падеж определяем по вопросу. И.п. кто? что? · Р.п. кого? чего? · Д.п. кому? чему? · В.п. кого? что? · Т.п. кем? чем? · П.п. о ком? о чём?",
+        full: "В русском языке шесть падежей. Падеж определяют по вопросу от главного слова.\n\nИменительный — кто? что? (есть кто? стол)\nРодительный — кого? чего? (нет чего? стола)\nДательный — кому? чему? (дать чему? столу)\nВинительный — кого? что? (вижу что? стол)\nТворительный — кем? чем? (доволен чем? столом)\nПредложный — о ком? о чём? (думаю о чём? о столе)\n\nПодсказка-помощник: И — есть, Р — нет, Д — дать, В — вижу, Т — доволен, П — думаю о.",
+      },
+      questions: [
+        { id: "n-pd1", type: "single", mode: "theory", level: "A", prompt: "На какие вопросы отвечает родительный падеж?", options: ["кого? чего?", "кто? что?", "кому? чему?", "кем? чем?"], correct: 0, answerText: "кого? чего?" },
+        { id: "n-pd2", type: "single", mode: "theory", level: "B", prompt: "В каком падеже существительное отвечает на вопросы кем? чем?", options: ["в творительном", "в дательном", "в предложном", "в винительном"], correct: 0, answerText: "в творительном" },
+        { id: "n-pd3", type: "single", mode: "practice", level: "B", prompt: "Определите падеж: «горжусь (кем?) братом».", options: ["творительный", "дательный", "родительный", "предложный"], correct: 0, answerText: "творительный", explain: "Вопрос кем? — это творительный падеж: горжусь братом." },
+        { id: "n-pd4", type: "match", mode: "practice", level: "C", prompt: "Определите падеж по вопросу.", lefts: ["кому? чему?", "о ком? о чём?"], matchOptions: ["дательный", "предложный", "родительный", "винительный"], matchCorrect: [0, 1], answerText: "кому? чему? — дательный, о ком? о чём? — предложный", explain: "Кому? чему? — дательный (дать). О ком? о чём? — предложный (думаю о). «Родительный» и «винительный» здесь лишние." },
+      ],
+    },
+  ],
+};
+
+// ── Тема «Прилагательное» ──────────────────────────────────────
+const ADJ = {
+  id: "adj",
+  title: "Прилагательное",
+  subtopics: [
+    {
+      id: "a-forma",
+      title: "Краткая и полная форма",
+      rule: {
+        simple: "Полная форма отвечает на какой? (красивый, добрый). Краткая — на каков? (красив, добр). Краткая обычно стоит в конце и является сказуемым.",
+        full: "Качественные прилагательные имеют две формы.\n\nПолная форма отвечает на вопросы какой? какая? какое? какие?: красивый, добрая, умное. В предложении чаще определение.\n\nКраткая форма отвечает на вопросы каков? какова? каково? каковы?: красив, добра, умно. Образуется от полной, в предложении обычно сказуемое: Мальчик умён. Краткая форма не склоняется по падежам.",
+      },
+      questions: [
+        { id: "a-fm1", type: "single", mode: "theory", level: "A", prompt: "На какой вопрос отвечает краткая форма прилагательного?", options: ["каков?", "какой?", "чей?", "который?"], correct: 0, answerText: "каков?" },
+        { id: "a-fm2", type: "single", mode: "practice", level: "A", prompt: "Укажите прилагательное в краткой форме.", options: ["красивый", "красив", "красивого", "красивому"], correct: 1, answerText: "красив", explain: "Красив отвечает на вопрос каков? — это краткая форма." },
+        { id: "a-fm3", type: "multi", mode: "practice", level: "B", prompt: "Отметьте все прилагательные в краткой форме.", options: ["умён", "добрый", "весела", "высокого", "строг", "новая"], correct: [0, 2, 4], answerText: "умён, весела, строг", explain: "Краткая форма отвечает на каков? какова?: умён, весела, строг. Остальные — полные." },
+        { id: "a-fm4", type: "match", mode: "practice", level: "C", prompt: "Определите форму прилагательного.", lefts: ["красив", "красивый"], matchOptions: ["краткая", "полная", "сравнительная", "превосходная"], matchCorrect: [0, 1], answerText: "красив — краткая, красивый — полная", explain: "Красив (каков?) — краткая, красивый (какой?) — полная. «Сравнительная» и «превосходная» — это степени, здесь лишние." },
+      ],
+    },
+    {
+      id: "a-razryad",
+      title: "Разряд",
+      rule: {
+        simple: "Три разряда. Качественные — признак, который бывает больше/меньше (красивый, добрый). Относительные — из чего/когда (деревянный, зимний). Притяжательные — чей? (лисий, мамин).",
+        full: "Прилагательные делятся на три разряда по значению.\n\nКачественные — обозначают признак, который может проявляться сильнее или слабее: красивый, добрый, высокий. Имеют степени сравнения и краткую форму.\n\nОтносительные — признак через отношение к материалу, времени, месту: деревянный (из дерева), зимний (зимой), городской. Степеней сравнения не имеют.\n\nПритяжательные — обозначают принадлежность, отвечают на вопрос чей?: лисий, мамин, отцов.",
+      },
+      questions: [
+        { id: "a-rz1", type: "single", mode: "theory", level: "A", prompt: "На какой вопрос отвечают притяжательные прилагательные?", options: ["чей?", "какой?", "каков?", "сколько?"], correct: 0, answerText: "чей?" },
+        { id: "a-rz2", type: "single", mode: "practice", level: "A", prompt: "Укажите качественное прилагательное.", options: ["деревянный", "добрый", "лисий", "мамин"], correct: 1, answerText: "добрый", explain: "Добрый обозначает признак, который бывает больше или меньше (добрее) — это качественное прилагательное." },
+        { id: "a-rz3", type: "single", mode: "practice", level: "B", prompt: "К какому разряду относится прилагательное «деревянный»?", options: ["относительное", "качественное", "притяжательное", "краткое"], correct: 0, answerText: "относительное", explain: "Деревянный — из дерева, признак по материалу → относительное прилагательное." },
+        { id: "a-rz4", type: "match", mode: "practice", level: "C", prompt: "Определите разряд прилагательного.", lefts: ["золотой (браслет)", "мамин"], matchOptions: ["относительное", "притяжательное", "качественное", "краткое"], matchCorrect: [0, 1], answerText: "золотой — относительное, мамин — притяжательное", explain: "Золотой браслет — из золота (относительное). Мамин — чей? (притяжательное). «Качественное» и «краткое» здесь лишние." },
+      ],
+    },
+    {
+      id: "a-pravopis",
+      title: "Правописание",
+      rule: {
+        simple: "Безударное окончание прилагательного проверяй вопросом от существительного: (каким?) добрым, (какого?) синего. Окончание вопроса подскажет букву.",
+        full: "Безударные окончания прилагательных проверяют по вопросу от существительного, к которому прилагательное относится.\n\nОкончание прилагательного совпадает с окончанием вопроса: погода (какая?) тёплая, с другом (каким?) верным, нет (какого?) синего.\n\nПоэтому при сомнении ставят вопрос: (каким?) — окончание -ым/-им, (какого?) — -ого/-его.",
+      },
+      questions: [
+        { id: "a-pr1", type: "single", mode: "theory", level: "A", prompt: "Как проверить безударное окончание прилагательного?", options: ["вопросом от существительного", "по ударению в корне", "по роду глагола", "по числу"], correct: 0, answerText: "вопросом от существительного" },
+        { id: "a-pr2", type: "single", mode: "practice", level: "B", prompt: "Выберите верное написание.", options: ["синим карандашом", "синем карандашом", "синым карандашом", "синям карандашом"], correct: 0, answerText: "синим карандашом", explain: "Карандашом (каким?) синим. Окончание -им." },
+        { id: "a-pr3", type: "single", mode: "practice", level: "B", prompt: "Какое окончание в словосочетании «о добр… человеке»?", options: ["-ом", "-ым", "-ого", "-ому"], correct: 0, answerText: "-ом", explain: "Ставим вопрос: о человеке (каком?) добром. Окончание -ом." },
+      ],
+    },
+    {
+      id: "a-stepen",
+      title: "Степень",
+      rule: {
+        simple: "Две степени. Сравнительная — признак больше/меньше: сильнее, более сильный. Превосходная — признак самый большой: сильнейший, самый сильный.",
+        full: "Качественные прилагательные образуют степени сравнения.\n\nСравнительная степень: признак проявляется сильнее или слабее, чем у другого предмета. Простая — с суффиксами -ее(-ей), -е, -ше: сильнее, выше, тоньше. Составная — слова более/менее + прилагательное: более сильный.\n\nПревосходная степень: признак в самой высокой мере. Простая — с суффиксами -ейш-, -айш-: сильнейший, глубочайший. Составная — слово самый + прилагательное: самый сильный.",
+      },
+      questions: [
+        { id: "a-st1", type: "single", mode: "theory", level: "A", prompt: "Какая степень показывает самый большой признак?", options: ["превосходная", "сравнительная", "краткая", "полная"], correct: 0, answerText: "превосходная" },
+        { id: "a-st2", type: "single", mode: "practice", level: "A", prompt: "Укажите прилагательное в сравнительной степени.", options: ["сильный", "сильнее", "сильнейший", "самый сильный"], correct: 1, answerText: "сильнее", explain: "Сильнее показывает, что признак больше, чем у другого, — это сравнительная степень." },
+        { id: "a-st3", type: "single", mode: "practice", level: "B", prompt: "«Самый умный» — это какая степень?", options: ["превосходная составная", "сравнительная простая", "превосходная простая", "сравнительная составная"], correct: 0, answerText: "превосходная составная", explain: "Слово самый + прилагательное = составная превосходная степень." },
+        { id: "a-st4", type: "match", mode: "practice", level: "C", prompt: "Определите степень сравнения.", lefts: ["выше", "высочайший"], matchOptions: ["сравнительная", "превосходная", "краткая форма", "относительное"], matchCorrect: [0, 1], answerText: "выше — сравнительная, высочайший — превосходная", explain: "Выше — признак больше (сравнительная). Высочайший — самый высокий (превосходная). Остальные варианты лишние." },
+      ],
+    },
+    {
+      id: "a-n-nn",
+      title: "Прил. с нн и н",
+      rule: {
+        simple: "НН пишем: на стыке основы и суффикса (сон+ный) и в суффиксах -енн-, -онн- (соломенный, лекционный). Н пишем в суффиксах -ин-, -ан-, -ян- (гусиный, кожаный). Исключения: стеклянный, оловянный, деревянный — НН; ветреный — Н.",
+        full: "В прилагательных, образованных от существительных:\n\nНН пишется: 1) если основа оканчивается на н, а суффикс тоже -н- (сон → сонный, длина → длинный); 2) в суффиксах -енн-, -онн- (солома → соломенный, станция → станционный).\n\nН пишется в суффиксах -ин-, -ан-, -ян- (гусь → гусиный, кожа → кожаный, серебро → серебряный).\n\nИсключения с НН: стеклянный, оловянный, деревянный. Исключение с Н: ветреный.",
+      },
+      questions: [
+        { id: "a-nn1", type: "single", mode: "theory", level: "B", prompt: "Сколько Н в суффиксе -енн- (например, соломенный)?", options: ["две (нн)", "одна (н)", "ни одной", "зависит от ударения"], correct: 0, answerText: "две (нн)" },
+        { id: "a-nn2", type: "single", mode: "practice", level: "B", prompt: "В каком слове пишется НН?", options: ["революционный", "кожаный", "гусиный", "серебряный"], correct: 0, answerText: "революционный", explain: "Суффикс -онн- пишется с НН: революционный. Кожаный (-ан-), гусиный (-ин-), серебряный (-ян-) — с одной Н." },
+        { id: "a-nn3", type: "single", mode: "practice", level: "C", prompt: "В каком слове пишется одна Н?", options: ["ветреный", "стеклянный", "деревянный", "оловянный"], correct: 0, answerText: "ветреный", explain: "Ветреный — исключение, пишется с одной Н. Стеклянный, деревянный, оловянный — исключения с НН." },
+        { id: "a-nn4", type: "multi", mode: "practice", level: "C", prompt: "Отметьте все прилагательные, где пишется НН.", options: ["длинный", "кожаный", "соломенный", "гусиный", "стеклянный", "серебряный"], correct: [0, 2, 4], answerText: "длинный, соломенный, стеклянный", explain: "Длинный (основа на н + суффикс н), соломенный (-енн-), стеклянный (исключение). Кожаный, гусиный, серебряный — одна Н." },
+      ],
+    },
+    {
+      id: "a-ne",
+      title: "Прил. с «не»",
+      rule: {
+        simple: "Слитно, если можно заменить синонимом без не (небольшой = маленький). Раздельно — если есть противопоставление с а (не большой, а маленький) или слова далеко не, вовсе не, ничуть не.",
+        full: "НЕ с прилагательными пишется слитно или раздельно.\n\nСлитно: если слово без не не употребляется (небрежный) или его можно заменить синонимом без не (небольшой = маленький, недобрый = злой).\n\nРаздельно: 1) если есть противопоставление с союзом а (не большой, а маленький); 2) при словах далеко не, вовсе не, отнюдь не, ничуть не, нисколько не (вовсе не интересный).",
+      },
+      questions: [
+        { id: "a-ne1", type: "single", mode: "theory", level: "B", prompt: "Когда НЕ с прилагательным пишется раздельно?", options: ["при противопоставлении с союзом а", "когда есть синоним без не", "всегда", "никогда"], correct: 0, answerText: "при противопоставлении с союзом а" },
+        { id: "a-ne2", type: "single", mode: "practice", level: "B", prompt: "Выберите слитное написание.", options: ["небольшой (=маленький)", "не большой, а маленький", "вовсе не большой", "далеко не большой"], correct: 0, answerText: "небольшой (=маленький)", explain: "Небольшой можно заменить синонимом маленький → пишем слитно." },
+        { id: "a-ne3", type: "single", mode: "practice", level: "B", prompt: "Где НЕ пишется раздельно?", options: ["не широкая, а узкая река", "неширокая река", "невысокий дом", "недобрый взгляд"], correct: 0, answerText: "не широкая, а узкая река", explain: "Есть противопоставление с союзом а (не широкая, а узкая) → пишем раздельно." },
+        { id: "a-ne4", type: "single", mode: "practice", level: "C", prompt: "Как пишется: «ничуть не интересный фильм»?", options: ["раздельно", "слитно", "через дефис", "зависит от рода"], correct: 0, answerText: "раздельно", explain: "При слове ничуть не прилагательное с не пишется раздельно: ничуть не интересный." },
+      ],
+    },
+    {
+      id: "a-padezhi",
+      title: "Образовывать падежные формы",
+      rule: {
+        simple: "Прилагательное стоит в том же роде, числе и падеже, что и существительное. Проверяй вопросом: с другом (каким?) верным, читаю (какую?) интересную.",
+        full: "Прилагательное согласуется с существительным — стоит в том же роде, числе и падеже.\n\nЧтобы образовать нужную форму, ставят вопрос от существительного: нет (какого?) синего моря, к (какому?) синему морю, о (каком?) синем море.\n\nОкончание прилагательного совпадает с окончанием вопроса — это помогает не ошибиться.",
+      },
+      questions: [
+        { id: "a-pf1", type: "single", mode: "theory", level: "A", prompt: "С чем согласуется прилагательное?", options: ["с существительным", "с глаголом", "с наречием", "с предлогом"], correct: 0, answerText: "с существительным" },
+        { id: "a-pf2", type: "single", mode: "practice", level: "B", prompt: "Какая форма подходит: «читаю (какую?) … книгу»?", options: ["интересную", "интересная", "интересной", "интересного"], correct: 0, answerText: "интересную", explain: "Книгу (какую?) интересную — винительный падеж, окончание -ую." },
+        { id: "a-pf3", type: "single", mode: "practice", level: "B", prompt: "Выберите верную форму: «горжусь (какой?) … страной».", options: ["родной", "родная", "родную", "родного"], correct: 0, answerText: "родной", explain: "Страной (какой?) родной — творительный падеж, женский род, окончание -ой." },
+        { id: "a-pf4", type: "match", mode: "practice", level: "C", prompt: "Поставьте вопрос и определите падеж прилагательного.", lefts: ["в новом доме", "нет нового дома"], matchOptions: ["предложный", "родительный", "дательный", "винительный"], matchCorrect: [0, 1], answerText: "в новом доме — предложный, нет нового дома — родительный", explain: "В доме (каком?) новом — предложный. Нет дома (какого?) нового — родительный. «Дательный» и «винительный» здесь лишние." },
+      ],
+    },
+    {
+      id: "a-otymen",
+      title: "Отыменные прил.",
+      rule: {
+        simple: "Отымённое прилагательное образовано от существительного (имени): камень → каменный, лес → лесной, город → городской.",
+        full: "Отымённые прилагательные образованы от имён существительных с помощью суффиксов -н-, -ск-, -ов-, -ан-, -ян-, -ин- и др.: камень → каменный, море → морской, лес → лесной, отец → отцов.\n\nОни называют признак предмета через отношение к другому предмету и часто бывают относительными или притяжательными.",
+      },
+      questions: [
+        { id: "a-ot1", type: "single", mode: "theory", level: "A", prompt: "От какой части речи образовано отымённое прилагательное?", options: ["от существительного", "от глагола", "от наречия", "от местоимения"], correct: 0, answerText: "от существительного" },
+        { id: "a-ot2", type: "single", mode: "practice", level: "A", prompt: "Укажите отымённое прилагательное.", options: ["каменный", "бегущий", "читавший", "красивее"], correct: 0, answerText: "каменный", explain: "Каменный образовано от существительного камень — это отымённое прилагательное." },
+        { id: "a-ot3", type: "multi", mode: "practice", level: "B", prompt: "Отметьте все прилагательные, образованные от существительных.", options: ["лесной", "городской", "молчаливый", "морской", "висячий", "певучий"], correct: [0, 1, 3], answerText: "лесной, городской, морской", explain: "От существительных: лес → лесной, город → городской, море → морской. Молчаливый, висячий, певучий образованы от глаголов." },
+        { id: "a-ot4", type: "single", mode: "practice", level: "B", prompt: "От какого слова образовано прилагательное «городской»?", options: ["город", "городить", "гора", "горка"], correct: 0, answerText: "город", explain: "Городской образовано от существительного город с суффиксом -ск-." },
+      ],
+    },
+  ],
+};
+
+// ── Тема «Наречие» ─────────────────────────────────────────────
+const ADVERB = {
+  id: "adverb",
+  title: "Наречие",
+  subtopics: [
+    {
+      id: "adv-chast",
+      title: "Наречие как часть речи",
+      rule: {
+        simple: "Наречие обозначает признак действия и отвечает на вопросы как? где? когда? куда? почему? Оно не изменяется: быстро, здесь, вчера.",
+        full: "Наречие — самостоятельная часть речи, которая обозначает признак действия, признак другого признака или признак предмета.\n\nОтвечает на вопросы: как? (быстро), где? (здесь), куда? (домой), когда? (вчера), почему? (сгоряча), зачем? (назло), сколько? (мало).\n\nГлавная особенность: наречие не изменяется — не склоняется и не спрягается. В предложении чаще всего обстоятельство.",
+      },
+      questions: [
+        { id: "adv-c1", type: "single", mode: "theory", level: "A", prompt: "Что обозначает наречие?", options: ["признак действия", "предмет", "количество предметов", "действие"], correct: 0, answerText: "признак действия" },
+        { id: "adv-c2", type: "single", mode: "theory", level: "A", prompt: "Как изменяется наречие?", options: ["не изменяется", "по падежам", "по родам", "по лицам"], correct: 0, answerText: "не изменяется" },
+        { id: "adv-c3", type: "single", mode: "practice", level: "A", prompt: "Укажите наречие.", options: ["быстрый", "быстро", "быстрота", "ускорить"], correct: 1, answerText: "быстро", explain: "Быстро отвечает на вопрос как? и не изменяется — это наречие. Быстрый — прилагательное, быстрота — существительное, ускорить — глагол." },
+        { id: "adv-c4", type: "multi", mode: "practice", level: "B", prompt: "Отметьте все наречия.", options: ["громко", "весёлый", "вчера", "дом", "далеко", "бежать"], correct: [0, 2, 4], answerText: "громко, вчера, далеко", explain: "Наречия отвечают на как? когда? где? и не изменяются: громко, вчера, далеко." },
+      ],
+    },
+    {
+      id: "adv-razryady",
+      title: "Разряды наречий",
+      rule: {
+        simple: "Наречия по значению: образа действия (как? — быстро), времени (когда? — вчера), места (где? куда? — здесь, домой), причины (почему? — сгоряча), цели (зачем? — назло), меры (сколько? — очень).",
+        full: "Наречия делятся по значению на разряды.\n\nОбраза действия — как? каким образом?: быстро, весело, вместе.\nВремени — когда? как долго?: вчера, всегда, давно.\nМеста — где? куда? откуда?: здесь, вверх, издалека.\nМеры и степени — сколько? насколько?: очень, дважды, чуть-чуть.\nПричины — почему?: сгоряча, поневоле.\nЦели — зачем? для чего?: назло, нарочно.",
+      },
+      questions: [
+        { id: "adv-r1", type: "single", mode: "theory", level: "A", prompt: "На какой вопрос отвечает наречие времени?", options: ["когда?", "где?", "как?", "зачем?"], correct: 0, answerText: "когда?" },
+        { id: "adv-r2", type: "single", mode: "practice", level: "A", prompt: "К какому разряду относится наречие «быстро»?", options: ["образа действия", "времени", "места", "причины"], correct: 0, answerText: "образа действия", explain: "Быстро отвечает на вопрос как? → наречие образа действия." },
+        { id: "adv-r3", type: "single", mode: "practice", level: "B", prompt: "Наречие «здесь» — какого разряда?", options: ["места", "времени", "цели", "меры"], correct: 0, answerText: "места", explain: "Здесь отвечает на вопрос где? → наречие места." },
+        { id: "adv-r4", type: "match", mode: "practice", level: "C", prompt: "Определите разряд наречия.", lefts: ["вчера", "далеко"], matchOptions: ["времени", "места", "цели", "причины"], matchCorrect: [0, 1], answerText: "вчера — времени, далеко — места", explain: "Вчера — когда? (времени). Далеко — где? (места). «Цели» и «причины» здесь лишние." },
+      ],
+    },
+    {
+      id: "adv-stepen",
+      title: "Наречие: степень",
+      rule: {
+        simple: "Наречия на -о образуют степени сравнения, как прилагательные. Сравнительная — быстрее, более быстро. Превосходная — чаще составная: быстрее всех.",
+        full: "Наречия на -о (образа действия) образуют степени сравнения.\n\nСравнительная степень: простая — с суффиксами -ее, -е, -ше (быстрее, громче, раньше); составная — более/менее + наречие (более быстро).\n\nПревосходная степень чаще составная: сравнительная степень + всех/всего (быстрее всех, лучше всего).\n\nВажно: сравнительная степень наречия и прилагательного совпадают по форме (быстрее). Различают по вопросу: у наречия — как? (бежит как? быстрее), у прилагательного — какой? (дом какой? выше).",
+      },
+      questions: [
+        { id: "adv-s1", type: "single", mode: "theory", level: "B", prompt: "Как отличить сравнительную степень наречия от прилагательного?", options: ["по вопросу (как? — наречие)", "по ударению", "по роду", "по числу"], correct: 0, answerText: "по вопросу (как? — наречие)" },
+        { id: "adv-s2", type: "single", mode: "practice", level: "B", prompt: "«Бежит быстрее» — это степень какой части речи?", options: ["наречия", "прилагательного", "глагола", "существительного"], correct: 0, answerText: "наречия", explain: "Бежит (как?) быстрее — вопрос как?, значит быстрее здесь наречие в сравнительной степени." },
+        { id: "adv-s3", type: "single", mode: "practice", level: "B", prompt: "Укажите наречие в сравнительной степени.", options: ["громко", "громче", "громкий", "громкость"], correct: 1, answerText: "громче", explain: "Громче — признак действия в большей мере (говорит как? громче) — сравнительная степень наречия." },
+        { id: "adv-s4", type: "single", mode: "practice", level: "C", prompt: "«Прыгнул выше всех» — какая степень наречия?", options: ["превосходная", "сравнительная простая", "положительная", "краткая"], correct: 0, answerText: "превосходная", explain: "Сравнительная степень + всех = составная превосходная степень: выше всех." },
+      ],
+    },
+    {
+      id: "adv-pravopis",
+      title: "Правописание наречий",
+      rule: {
+        simple: "Через дефис: приставка по- + -ому/-ему/-и (по-новому, по-русски), приставка в-/во- + -ых/-их (во-первых), повтор слов (еле-еле). Слитно: если образовано от других частей речи (вниз, наверху).",
+        full: "Правописание наречий.\n\nЧерез дефис пишутся наречия: 1) с приставкой по- и суффиксами -ому, -ему, -и (по-новому, по-моему, по-русски); 2) с приставкой в-/во- и суффиксами -ых, -их (во-первых, в-третьих); 3) образованные повтором (еле-еле, давным-давно, точь-в-точь); 4) с приставкой кое- и суффиксами -то, -либо, -нибудь (кое-как, когда-нибудь).\n\nСлитно пишутся многие наречия, образованные от других частей речи: вниз, наверх, вручную, издалека.\n\nНа конце наречий после шипящих под ударением пишется ь: настежь, наотмашь (кроме уж, замуж, невтерпёж).",
+      },
+      questions: [
+        { id: "adv-p1", type: "single", mode: "theory", level: "B", prompt: "Как пишется наречие с приставкой по- и суффиксом -ому?", options: ["через дефис", "слитно", "раздельно", "через два дефиса"], correct: 0, answerText: "через дефис" },
+        { id: "adv-p2", type: "single", mode: "practice", level: "B", prompt: "Выберите верное написание.", options: ["по-русски", "порусски", "по русски", "по-русск-и"], correct: 0, answerText: "по-русски", explain: "Приставка по- + суффикс -и → пишем через дефис: по-русски." },
+        { id: "adv-p3", type: "single", mode: "practice", level: "B", prompt: "Как пишется наречие «во(-)первых»?", options: ["во-первых", "вопервых", "во первых", "во-первы-х"], correct: 0, answerText: "во-первых", explain: "Приставка во- + суффикс -ых → через дефис: во-первых." },
+        { id: "adv-p4", type: "multi", mode: "practice", level: "C", prompt: "Отметьте наречия, которые пишутся через дефис.", options: ["по-новому", "вниз", "еле-еле", "наверх", "кое-как", "издалека"], correct: [0, 2, 4], answerText: "по-новому, еле-еле, кое-как", explain: "Через дефис: по- + -ому (по-новому), повтор (еле-еле), кое- (кое-как). Вниз, наверх, издалека — слитно." },
+      ],
+    },
+  ],
+};
+
+// ── Тема «Числительное» ────────────────────────────────────────
+const NUMERAL = {
+  id: "numeral",
+  title: "Числительное",
+  subtopics: [
+    {
+      id: "num-chast",
+      title: "Числительное как часть речи",
+      rule: {
+        simple: "Числительное обозначает число, количество или порядок при счёте. Отвечает на вопросы сколько? (пять) и который? какой по счёту? (пятый).",
+        full: "Имя числительное — самостоятельная часть речи, которая обозначает число, количество предметов или порядок их при счёте.\n\nКоличественные числительные отвечают на вопрос сколько?: два, пять, двадцать, сто.\n\nПорядковые числительные отвечают на вопрос который? какой по счёту?: второй, пятый, двадцатый.\n\nЧислительные, в отличие от других слов с числовым значением, можно записать цифрой.",
+      },
+      questions: [
+        { id: "num-c1", type: "single", mode: "theory", level: "A", prompt: "На какой вопрос отвечает количественное числительное?", options: ["сколько?", "который?", "какой?", "чей?"], correct: 0, answerText: "сколько?" },
+        { id: "num-c2", type: "single", mode: "theory", level: "A", prompt: "На какой вопрос отвечает порядковое числительное?", options: ["который? какой по счёту?", "сколько?", "что?", "как?"], correct: 0, answerText: "который? какой по счёту?" },
+        { id: "num-c3", type: "single", mode: "practice", level: "A", prompt: "Укажите порядковое числительное.", options: ["пять", "пятый", "пятеро", "пятёрка"], correct: 1, answerText: "пятый", explain: "Пятый отвечает на вопрос который? — это порядковое числительное. Пять — количественное, пятёрка — существительное." },
+        { id: "num-c4", type: "match", mode: "practice", level: "C", prompt: "Определите разряд числительного.", lefts: ["три", "третий"], matchOptions: ["количественное", "порядковое", "собирательное", "существительное"], matchCorrect: [0, 1], answerText: "три — количественное, третий — порядковое", explain: "Три — сколько? (количественное). Третий — который? (порядковое). Остальные варианты здесь лишние." },
+      ],
+    },
+    {
+      id: "num-razryad",
+      title: "Разряд числительных",
+      rule: {
+        simple: "Количественные бывают: целые (пять), дробные (одна вторая), собирательные (двое, трое). Порядковые показывают порядок: первый, второй.",
+        full: "Числительные делятся на разряды.\n\nКоличественные — обозначают количество и делятся на:\n• целые: два, пятнадцать, сто;\n• дробные: одна вторая, три четвёртых, полтора;\n• собирательные: двое, трое, четверо, семеро (обозначают несколько предметов как одно целое).\n\nПорядковые — обозначают порядок при счёте: первый, десятый, сотый.",
+      },
+      questions: [
+        { id: "num-r1", type: "single", mode: "theory", level: "A", prompt: "К какому разряду относится числительное «двое»?", options: ["собирательное", "дробное", "порядковое", "целое"], correct: 0, answerText: "собирательное" },
+        { id: "num-r2", type: "single", mode: "practice", level: "A", prompt: "Укажите дробное числительное.", options: ["пять", "одна вторая", "пятеро", "пятый"], correct: 1, answerText: "одна вторая", explain: "Одна вторая обозначает часть целого — это дробное числительное." },
+        { id: "num-r3", type: "single", mode: "practice", level: "B", prompt: "Числительное «семеро» относится к разряду…", options: ["собирательных", "целых", "дробных", "порядковых"], correct: 0, answerText: "собирательных", explain: "Семеро обозначает несколько предметов вместе — собирательное числительное." },
+        { id: "num-r4", type: "match", mode: "practice", level: "C", prompt: "Определите разряд количественного числительного.", lefts: ["десять", "трое"], matchOptions: ["целое", "собирательное", "дробное", "порядковое"], matchCorrect: [0, 1], answerText: "десять — целое, трое — собирательное", explain: "Десять — целое число. Трое — собирательное. «Дробное» и «порядковое» здесь лишние." },
+      ],
+    },
+    {
+      id: "num-sostav",
+      title: "По составу: простое, составное, сложное",
+      rule: {
+        simple: "Простое — один корень (пять, сто). Сложное — два корня в одном слове (пятьдесят, шестьсот). Составное — из нескольких слов (двадцать пять, сто сорок два).",
+        full: "По составу числительные бывают трёх видов.\n\nПростые — состоят из одного корня: два, семь, сто, третий.\n\nСложные — состоят из двух корней и пишутся слитно: пятьдесят, шестьсот, семидесятый.\n\nСоставные — состоят из нескольких слов: двадцать пять, сто сорок два, тысяча девятьсот.",
+      },
+      questions: [
+        { id: "num-so1", type: "single", mode: "theory", level: "A", prompt: "Из скольких корней состоит сложное числительное?", options: ["из двух", "из одного", "из трёх", "из нескольких слов"], correct: 0, answerText: "из двух" },
+        { id: "num-so2", type: "single", mode: "practice", level: "A", prompt: "Укажите составное числительное.", options: ["пять", "пятьдесят", "двадцать пять", "пятый"], correct: 2, answerText: "двадцать пять", explain: "Двадцать пять состоит из нескольких слов — это составное числительное." },
+        { id: "num-so3", type: "single", mode: "practice", level: "B", prompt: "Числительное «шестьсот» по составу…", options: ["сложное", "простое", "составное", "дробное"], correct: 0, answerText: "сложное", explain: "Шестьсот состоит из двух корней (шесть + сто) и пишется слитно — сложное числительное." },
+        { id: "num-so4", type: "match", mode: "practice", level: "C", prompt: "Определите числительное по составу.", lefts: ["семь", "семьдесят"], matchOptions: ["простое", "сложное", "составное", "собирательное"], matchCorrect: [0, 1], answerText: "семь — простое, семьдесят — сложное", explain: "Семь — один корень (простое). Семьдесят — два корня (сложное). «Составное» и «собирательное» здесь лишние." },
+      ],
+    },
+    {
+      id: "num-drugie",
+      title: "Слова с числовым значением других частей речи",
+      rule: {
+        simple: "Не всё, что про число, — числительное. Пятёрка, тройка — существительные; удвоить — глагол; двойной — прилагательное. Числительное можно записать цифрой и оно отвечает на сколько?/который?",
+        full: "Числовое значение имеют и другие части речи, но числительными они не являются.\n\nСуществительные: пятёрка, тройка, десяток, сотня, пара (отвечают на вопрос что?, изменяются по числам: пятёрки).\nПрилагательные: двойной, тройной, столетний (отвечают на вопрос какой?).\nГлаголы: удвоить, утроить (что сделать?).\nНаречия: вдвое, втрое (как?).\n\nОтличие числительного: оно отвечает на сколько? или который? и записывается цифрой (5, пятый).",
+      },
+      questions: [
+        { id: "num-d1", type: "single", mode: "theory", level: "B", prompt: "Как отличить числительное от других слов с числовым значением?", options: ["отвечает на сколько?/который? и пишется цифрой", "начинается с цифры", "всегда во множественном числе", "не изменяется"], correct: 0, answerText: "отвечает на сколько?/который? и пишется цифрой" },
+        { id: "num-d2", type: "single", mode: "practice", level: "B", prompt: "Какое слово НЕ является числительным?", options: ["пять", "пятёрка", "пятый", "пятнадцать"], correct: 1, answerText: "пятёрка", explain: "Пятёрка отвечает на вопрос что? и изменяется по числам (пятёрки) — это существительное, а не числительное." },
+        { id: "num-d3", type: "single", mode: "practice", level: "B", prompt: "Какой частью речи является слово «удвоить»?", options: ["глагол", "числительное", "существительное", "наречие"], correct: 0, answerText: "глагол", explain: "Удвоить отвечает на вопрос что сделать? — это глагол, хотя и связан с числом." },
+        { id: "num-d4", type: "multi", mode: "practice", level: "C", prompt: "Отметьте только имена числительные.", options: ["семь", "семёрка", "седьмой", "сдвоить", "двадцать", "двойной"], correct: [0, 2, 4], answerText: "семь, седьмой, двадцать", explain: "Числительные: семь, седьмой, двадцать (сколько?/который?). Семёрка — существительное, сдвоить — глагол, двойной — прилагательное." },
+      ],
+    },
+    {
+      id: "num-sklonenie",
+      title: "Склонение числительных",
+      rule: {
+        simple: "В сложных числительных 50–80, 500–900 склоняются обе части: пятьюдесятью, о пятистах. В составных склоняется каждое слово: с двадцатью пятью.",
+        full: "Числительные изменяются по падежам (склоняются).\n\nВ сложных числительных от 50 до 80 и от 500 до 900 склоняются обе части: пятьдесят — пятидесяти — пятьюдесятью — о пятидесяти.\n\nВ составных количественных числительных склоняется каждое слово: двести сорок пять — двухсот сорока пяти — двумястами сорока пятью.\n\nВ составных порядковых склоняется только последнее слово: две тысячи двадцать пятый — в две тысячи двадцать пятом году.",
+      },
+      questions: [
+        { id: "num-sk1", type: "single", mode: "theory", level: "B", prompt: "Сколько частей склоняется в числительном «пятьдесят»?", options: ["обе части", "только первая", "только вторая", "не склоняется"], correct: 0, answerText: "обе части" },
+        { id: "num-sk2", type: "single", mode: "theory", level: "B", prompt: "Сколько слов склоняется в составном порядковом числительном?", options: ["только последнее", "каждое слово", "только первое", "не склоняется"], correct: 0, answerText: "только последнее" },
+        { id: "num-sk3", type: "single", mode: "practice", level: "C", prompt: "Выберите верную форму творительного падежа числа 50.", options: ["пятьюдесятью", "пятидесятью", "пятьдесятью", "пятьюдесяти"], correct: 0, answerText: "пятьюдесятью", explain: "В творительном падеже склоняются обе части: пятью + десятью = пятьюдесятью." },
+        { id: "num-sk4", type: "single", mode: "practice", level: "C", prompt: "Как правильно: «к 240 домам»?", options: ["двумстам сорока", "двести сорока", "двухстах сорока", "двумястами сорока"], correct: 0, answerText: "двумстам сорока", explain: "В составном числительном склоняется каждое слово. Дательный падеж: двумстам сорока (домам)." },
+      ],
+    },
+  ],
+};
+
+// ── Тема «Местоимение» ─────────────────────────────────────────
+const PRONOUN = {
+  id: "pronoun",
+  title: "Местоимение",
+  subtopics: [
+    {
+      id: "pr-chast",
+      title: "Мест. как часть речи",
+      rule: {
+        simple: "Местоимение указывает на предмет, признак или количество, но не называет их. Вместо существительного: он, кто; вместо прилагательного: такой, мой; вместо числительного: сколько, столько.",
+        full: "Местоимение — самостоятельная часть речи, которая указывает на предметы, признаки, количество, но не называет их.\n\nМестоимения-существительные: я, ты, он, кто, что, никто (указывают на предмет).\nМестоимения-прилагательные: мой, твой, такой, каждый, этот (указывают на признак).\nМестоимения-числительные: сколько, столько, несколько (указывают на количество).\n\nМестоимения помогают избежать повторов: Пришёл Асхат. Он опоздал.",
+      },
+      questions: [
+        { id: "pr-c1", type: "single", mode: "theory", level: "A", prompt: "Что делает местоимение?", options: ["указывает на предмет, но не называет его", "называет действие", "обозначает признак предмета", "связывает слова в предложении"], correct: 0, answerText: "указывает на предмет, но не называет его" },
+        { id: "pr-c2", type: "single", mode: "practice", level: "A", prompt: "Укажите местоимение.", options: ["дом", "он", "бежать", "красивый"], correct: 1, answerText: "он", explain: "Он указывает на предмет, но не называет его, — это местоимение." },
+        { id: "pr-c3", type: "multi", mode: "practice", level: "B", prompt: "Отметьте все местоимения.", options: ["я", "стол", "мой", "бежать", "кто", "быстро"], correct: [0, 2, 4], answerText: "я, мой, кто", explain: "Местоимения указывают на предмет или признак: я, мой, кто." },
+        { id: "pr-c4", type: "single", mode: "practice", level: "B", prompt: "Каким словом можно заменить существительное «книга», чтобы не повторяться?", options: ["она", "эта книга", "книжка", "читать"], correct: 0, answerText: "она", explain: "Местоимение она указывает на предмет вместо слова книга." },
+      ],
+    },
+    {
+      id: "pr-razryad",
+      title: "Разряд",
+      rule: {
+        simple: "Разряды: личные (я, ты, он), притяжательные (мой, твой), вопросительные (кто? что?), указательные (этот, тот), определительные (весь, каждый), отрицательные (никто), неопределённые (кто-то).",
+        full: "Местоимения делятся на разряды.\n\nЛичные: я, ты, он, она, мы, вы, они.\nВозвратное: себя.\nПритяжательные: мой, твой, наш, ваш, свой.\nВопросительные: кто? что? какой? сколько? (в вопросе).\nОтносительные: те же слова, но связывают части предложения.\nУказательные: этот, тот, такой, столько.\nОпределительные: весь, каждый, сам, любой.\nОтрицательные: никто, ничто, никакой.\nНеопределённые: кто-то, что-нибудь, некто, несколько.",
+      },
+      questions: [
+        { id: "pr-r1", type: "single", mode: "theory", level: "A", prompt: "К какому разряду относятся местоимения я, ты, он?", options: ["личные", "притяжательные", "указательные", "отрицательные"], correct: 0, answerText: "личные" },
+        { id: "pr-r2", type: "single", mode: "practice", level: "A", prompt: "Укажите притяжательное местоимение.", options: ["он", "мой", "кто", "этот"], correct: 1, answerText: "мой", explain: "Мой указывает на принадлежность (чей?) — притяжательное местоимение." },
+        { id: "pr-r3", type: "single", mode: "practice", level: "B", prompt: "Местоимение «никто» относится к разряду…", options: ["отрицательных", "личных", "указательных", "определительных"], correct: 0, answerText: "отрицательных", explain: "Никто указывает на отсутствие предмета — отрицательное местоимение." },
+        { id: "pr-r4", type: "match", mode: "practice", level: "C", prompt: "Определите разряд местоимения.", lefts: ["мой", "кто-то"], matchOptions: ["притяжательное", "неопределённое", "личное", "отрицательное"], matchCorrect: [0, 1], answerText: "мой — притяжательное, кто-то — неопределённое", explain: "Мой — чей? (притяжательное). Кто-то — указывает неточно (неопределённое). «Личное» и «отрицательное» здесь лишние." },
+      ],
+    },
+    {
+      id: "pr-pravopis",
+      title: "Правописание",
+      rule: {
+        simple: "Неопределённые местоимения с кое-, -то, -либо, -нибудь пишутся через дефис (кое-кто, что-то). В отрицательных под ударением пишется не- (не́где), без ударения — ни- (нигде́).",
+        full: "Правописание местоимений.\n\nНеопределённые местоимения пишутся через дефис, если есть кое-, -то, -либо, -нибудь: кое-кто, что-то, какой-либо, кто-нибудь. Но если между кое- и местоимением есть предлог — раздельно: кое у кого.\n\nВ отрицательных местоимениях: под ударением пишется не- (не́кого, не́чего), без ударения — ни- (никого́, ничего́).\n\nЕсли есть предлог, не/ни пишется раздельно, в три слова: не с кем, ни у кого.",
+      },
+      questions: [
+        { id: "pr-p1", type: "single", mode: "theory", level: "B", prompt: "Как пишутся местоимения с частицами -то, -либо, -нибудь?", options: ["через дефис", "слитно", "раздельно", "через два дефиса"], correct: 0, answerText: "через дефис" },
+        { id: "pr-p2", type: "single", mode: "practice", level: "B", prompt: "Выберите верное написание.", options: ["кто-то", "кто то", "ктото", "кто-то́"], correct: 0, answerText: "кто-то", explain: "Суффикс -то пишется через дефис: кто-то." },
+        { id: "pr-p3", type: "single", mode: "practice", level: "C", prompt: "Где пишется приставка НЕ-?", options: ["не́где отдохнуть", "нигде́ не был", "никто́ не знал", "ничего́ не понял"], correct: 0, answerText: "не́где отдохнуть", explain: "Под ударением в отрицательных местоимениях и наречиях пишется не-: не́где. Без ударения — ни-: нигде́, никто́." },
+        { id: "pr-p4", type: "single", mode: "practice", level: "C", prompt: "Как пишется «кое (у) кого»?", options: ["кое у кого (раздельно)", "коеукого", "кое-у-кого", "кое-укого"], correct: 0, answerText: "кое у кого (раздельно)", explain: "Если между кое- и местоимением есть предлог, пишем раздельно: кое у кого." },
+      ],
+    },
+    {
+      id: "pr-padezhi",
+      title: "Образовывать падежные формы",
+      rule: {
+        simple: "Местоимения склоняются по падежам, часто с другим корнем: я — меня — мне; он — его — ему. После предлога у 3-го лица появляется н: у него, к ней.",
+        full: "Местоимения изменяются по падежам, но часто необычно.\n\nЛичные меняют основу: я — меня — мне — меня — мной — обо мне; он — его — ему — его — им — о нём.\n\nПосле предлогов у местоимений 3-го лица (он, она, они) появляется начальное н: у него, к ней, с ними, о них.\n\nВопрос помогает определить падеж: нет (кого?) его, дать (кому?) ему.",
+      },
+      questions: [
+        { id: "pr-pf1", type: "single", mode: "theory", level: "B", prompt: "Какая буква появляется у местоимений 3-го лица после предлога?", options: ["н (у него, к ней)", "й", "в", "с"], correct: 0, answerText: "н (у него, к ней)" },
+        { id: "pr-pf2", type: "single", mode: "practice", level: "B", prompt: "Выберите верную форму.", options: ["у него", "у его", "у нему", "у ним"], correct: 0, answerText: "у него", explain: "После предлога у местоимения 3-го лица появляется н: у него." },
+        { id: "pr-pf3", type: "single", mode: "practice", level: "B", prompt: "Определите падеж местоимения: «дал (кому?) мне».", options: ["дательный", "родительный", "винительный", "творительный"], correct: 0, answerText: "дательный", explain: "Вопрос кому? — дательный падеж: дал мне." },
+        { id: "pr-pf4", type: "match", mode: "practice", level: "C", prompt: "Определите падеж местоимения.", lefts: ["нет меня", "дать мне"], matchOptions: ["родительный", "дательный", "винительный", "творительный"], matchCorrect: [0, 1], answerText: "меня — родительный, мне — дательный", explain: "Нет (кого?) меня — родительный. Дать (кому?) мне — дательный. «Винительный» и «творительный» здесь лишние." },
+      ],
+    },
+  ],
+};
+
+// ── Тема «Лексикология» ────────────────────────────────────────
+const LEXIS = {
+  id: "lexis",
+  title: "Лексикология",
+  subtopics: [
+    {
+      id: "lx-obshee",
+      title: "Лексикология",
+      rule: {
+        simple: "Лексикология изучает слова и их значения. Лексическое значение — это то, что слово обозначает (стол — предмет мебели).",
+        full: "Лексикология — раздел науки о языке, который изучает слово и его значение, а также словарный состав языка.\n\nЛексическое значение слова — это его смысл, то, что слово обозначает: стол — предмет мебели для работы и еды.\n\nЛексическое значение объясняется в толковых словарях. Кроме лексического, слово имеет и грамматическое значение (часть речи, род, число и др.).",
+      },
+      questions: [
+        { id: "lx-o1", type: "single", mode: "theory", level: "A", prompt: "Что изучает лексикология?", options: ["слово и его значение", "звуки речи", "состав слова", "знаки препинания"], correct: 0, answerText: "слово и его значение" },
+        { id: "lx-o2", type: "single", mode: "theory", level: "A", prompt: "Что такое лексическое значение слова?", options: ["то, что слово обозначает", "его состав", "его звучание", "его роль в предложении"], correct: 0, answerText: "то, что слово обозначает" },
+        { id: "lx-o3", type: "single", mode: "practice", level: "B", prompt: "В каком словаре объясняется лексическое значение слова?", options: ["в толковом", "в орфографическом", "в орфоэпическом", "в словаре синонимов"], correct: 0, answerText: "в толковом", explain: "Значение слов объясняет толковый словарь." },
+        { id: "lx-o4", type: "single", mode: "practice", level: "B", prompt: "Что является лексическим значением слова «врач»?", options: ["человек, который лечит людей", "существительное мужского рода", "слово из двух слогов", "одушевлённое существительное"], correct: 0, answerText: "человек, который лечит людей", explain: "Лексическое значение — это смысл слова. Остальные варианты — грамматические признаки." },
+      ],
+    },
+    {
+      id: "lx-znachenie",
+      title: "Прямое и переносное значение",
+      rule: {
+        simple: "Прямое значение — основное, точное (золотое кольцо — из золота). Переносное — по сходству (золотые руки — умелые). Переносное часто в сравнениях и метафорах.",
+        full: "Многозначные слова имеют прямое и переносное значение.\n\nПрямое значение — основное, первичное значение слова: железный гвоздь (из железа), идёт человек (передвигается).\n\nПереносное значение возникает по сходству предметов или признаков: железный характер (твёрдый), идёт дождь, золотые руки (умелые).\n\nНа переносном значении построены метафоры и другие средства выразительности.",
+      },
+      questions: [
+        { id: "lx-z1", type: "single", mode: "theory", level: "A", prompt: "Какое значение слова является основным, первичным?", options: ["прямое", "переносное", "общее", "дополнительное"], correct: 0, answerText: "прямое" },
+        { id: "lx-z2", type: "single", mode: "practice", level: "B", prompt: "В каком словосочетании слово употреблено в переносном значении?", options: ["золотые руки", "золотое кольцо", "золотая монета", "золотая цепочка"], correct: 0, answerText: "золотые руки", explain: "Золотые руки — умелые (по сходству), это переносное значение. В остальных золотой — из золота (прямое)." },
+        { id: "lx-z3", type: "single", mode: "practice", level: "B", prompt: "Где слово «идёт» в прямом значении?", options: ["человек идёт по дороге", "дождь идёт", "время идёт", "идёт спектакль"], correct: 0, answerText: "человек идёт по дороге", explain: "Идёт (передвигается ногами) — прямое значение. Дождь идёт, время идёт — переносное." },
+        { id: "lx-z4", type: "match", mode: "practice", level: "C", prompt: "Определите значение слова «горит».", lefts: ["горит костёр", "горит лицо от стыда"], matchOptions: ["прямое", "переносное", "общее", "главное"], matchCorrect: [0, 1], answerText: "горит костёр — прямое, горит лицо — переносное", explain: "Костёр горит (даёт огонь) — прямое. Лицо горит (краснеет по сходству) — переносное. «Общее» и «главное» здесь лишние." },
+      ],
+    },
+    {
+      id: "lx-mnogoznach",
+      title: "Многозначные и однозначные слова",
+      rule: {
+        simple: "Однозначное слово имеет одно значение (берёза, карандаш). Многозначное — несколько связанных значений (ключ — от двери, родник, скрипичный).",
+        full: "По количеству значений слова бывают однозначными и многозначными.\n\nОднозначные слова имеют только одно лексическое значение: берёза, троллейбус, суффикс. Чаще это термины и названия конкретных предметов.\n\nМногозначные слова имеют два и более связанных значений: ключ (от замка / родник / музыкальный знак), кисть (руки / для рисования / винограда).\n\nЗначения многозначного слова всегда чем-то связаны между собой.",
+      },
+      questions: [
+        { id: "lx-m1", type: "single", mode: "theory", level: "A", prompt: "Сколько значений у однозначного слова?", options: ["одно", "два", "несколько", "ни одного"], correct: 0, answerText: "одно" },
+        { id: "lx-m2", type: "single", mode: "practice", level: "B", prompt: "Какое слово является многозначным?", options: ["ключ", "берёза", "троллейбус", "карандаш"], correct: 0, answerText: "ключ", explain: "Ключ имеет несколько значений: от двери, родник, музыкальный знак — это многозначное слово." },
+        { id: "lx-m3", type: "single", mode: "practice", level: "B", prompt: "Какое слово однозначное?", options: ["берёза", "кисть", "идти", "земля"], correct: 0, answerText: "берёза", explain: "Берёза называет только одно дерево — однозначное слово." },
+        { id: "lx-m4", type: "multi", mode: "practice", level: "C", prompt: "Отметьте все многозначные слова.", options: ["игла", "троллейбус", "язык", "суффикс", "хвост"], correct: [0, 2, 4], answerText: "игла, язык, хвост", explain: "Многозначные: игла (швейная / сосны / ежа), язык (орган / речь), хвост (у животного / очереди / самолёта). Троллейбус и суффикс — однозначные." },
+      ],
+    },
+    {
+      id: "lx-sinonimy",
+      title: "Слова: антонимы, синонимы, омонимы",
+      rule: {
+        simple: "Синонимы — близкие по смыслу (смелый — храбрый). Антонимы — противоположные (день — ночь). Омонимы — звучат одинаково, а значат разное (коса — волосы / орудие).",
+        full: "По значению выделяют группы слов.\n\nСинонимы — слова одной части речи, близкие по значению: смелый — храбрый — отважный, идти — шагать.\n\nАнтонимы — слова с противоположным значением: день — ночь, добрый — злой, высоко — низко.\n\nОмонимы — слова, которые одинаково звучат и пишутся, но имеют разное значение: коса (причёска / орудие / у реки), ключ (от двери / родник).",
+      },
+      questions: [
+        { id: "lx-s1", type: "single", mode: "theory", level: "A", prompt: "Как называются слова с противоположным значением?", options: ["антонимы", "синонимы", "омонимы", "паронимы"], correct: 0, answerText: "антонимы" },
+        { id: "lx-s2", type: "single", mode: "practice", level: "A", prompt: "Укажите синоним к слову «смелый».", options: ["храбрый", "трусливый", "слабый", "злой"], correct: 0, answerText: "храбрый", explain: "Храбрый близко по значению к смелый — это синоним. Трусливый — антоним." },
+        { id: "lx-s3", type: "single", mode: "practice", level: "B", prompt: "Какая пара является антонимами?", options: ["день — ночь", "дом — здание", "идти — шагать", "весёлый — радостный"], correct: 0, answerText: "день — ночь", explain: "День и ночь противоположны по значению — это антонимы. Остальные пары — синонимы." },
+        { id: "lx-s4", type: "match", mode: "practice", level: "C", prompt: "Определите отношение между словами.", lefts: ["добрый — злой", "грустный — печальный"], matchOptions: ["антонимы", "синонимы", "омонимы", "паронимы"], matchCorrect: [0, 1], answerText: "добрый — злой — антонимы, грустный — печальный — синонимы", explain: "Добрый — злой противоположны (антонимы). Грустный — печальный близки (синонимы). «Омонимы» и «паронимы» здесь лишние." },
+      ],
+    },
+    {
+      id: "lx-omonimy",
+      title: "Виды омонимов",
+      rule: {
+        simple: "Омофоны — звучат одинаково, пишутся по-разному (луг — лук). Омографы — пишутся одинаково, ударение разное (за́мок — замо́к). Омоформы — совпадают в одной форме (три друга — три морковь ножом).",
+        full: "Кроме полных омонимов, выделяют их виды.\n\nОмофоны — одинаково звучат, но по-разному пишутся: луг — лук, плод — плот, компания — кампания.\n\nОмографы — одинаково пишутся, но различаются ударением: за́мок — замо́к, му́ка — мука́, кру́жки — кружки́.\n\nОмоформы — совпадают только в отдельных формах: три (числительное) — три (глагол «тереть»); стекло (существительное) — стекло (глагол).",
+      },
+      questions: [
+        { id: "lx-om1", type: "single", mode: "theory", level: "B", prompt: "Как называются слова, которые звучат одинаково, но пишутся по-разному?", options: ["омофоны", "омографы", "омоформы", "синонимы"], correct: 0, answerText: "омофоны" },
+        { id: "lx-om2", type: "single", mode: "theory", level: "B", prompt: "Чем различаются омографы?", options: ["ударением", "только значением", "частью речи", "родом"], correct: 0, answerText: "ударением", explain: "Омографы пишутся одинаково, а различаются ударением: за́мок — замо́к." },
+        { id: "lx-om3", type: "single", mode: "practice", level: "B", prompt: "Какая пара является омофонами?", options: ["луг — лук", "за́мок — замо́к", "коса — коса", "стол — столы"], correct: 0, answerText: "луг — лук", explain: "Луг и лук звучат одинаково [лук], но пишутся по-разному — это омофоны." },
+        { id: "lx-om4", type: "match", mode: "practice", level: "C", prompt: "Определите вид омонимов.", lefts: ["плод — плот", "му́ка — мука́"], matchOptions: ["омофоны", "омографы", "омоформы", "синонимы"], matchCorrect: [0, 1], answerText: "плод — плот — омофоны, му́ка — мука́ — омографы", explain: "Плод — плот звучат одинаково, пишутся по-разному (омофоны). Му́ка — мука́ различаются ударением (омографы). Остальные варианты лишние." },
+      ],
+    },
+    {
+      id: "lx-frazeo",
+      title: "Фразеологический оборот",
+      rule: {
+        simple: "Фразеологизм — устойчивое сочетание слов с единым переносным смыслом: бить баклуши (бездельничать), водить за нос (обманывать). Слова в нём нельзя заменить.",
+        full: "Фразеологический оборот (фразеологизм) — устойчивое сочетание слов, которое имеет единое, целостное значение.\n\nЗначение фразеологизма не складывается из значений слов: бить баклуши — бездельничать, водить за нос — обманывать, спустя рукава — небрежно.\n\nОсобенности: слова во фразеологизме нельзя заменить или переставить, а сам оборот можно заменить одним словом-синонимом (зарубить на носу = запомнить).",
+      },
+      questions: [
+        { id: "lx-fr1", type: "single", mode: "theory", level: "A", prompt: "Что такое фразеологизм?", options: ["устойчивое сочетание слов с единым значением", "слово с несколькими значениями", "слово в переносном значении", "противоположные по смыслу слова"], correct: 0, answerText: "устойчивое сочетание слов с единым значением" },
+        { id: "lx-fr2", type: "single", mode: "practice", level: "B", prompt: "Что означает фразеологизм «бить баклуши»?", options: ["бездельничать", "драться", "много работать", "шуметь"], correct: 0, answerText: "бездельничать", explain: "Бить баклуши — устойчивое выражение со значением «бездельничать»." },
+        { id: "lx-fr3", type: "single", mode: "practice", level: "B", prompt: "Что означает «водить за нос»?", options: ["обманывать", "вести за руку", "помогать", "хвалить"], correct: 0, answerText: "обманывать", explain: "Водить за нос — фразеологизм со значением «обманывать»." },
+        { id: "lx-fr4", type: "single", mode: "practice", level: "C", prompt: "Каким словом можно заменить фразеологизм «зарубить на носу»?", options: ["запомнить", "поранить", "забыть", "записать"], correct: 0, answerText: "запомнить", explain: "Зарубить на носу означает «крепко запомнить». Буквального отношения к носу здесь нет." },
+      ],
+    },
+  ],
+};
+
+// ── Темы, которые ещё не наполнены (в порядке курса) ───────────
+const STUB = (id, title) => ({ id, title, subtopics: [] });
+
+// ── Полный список тем в порядке курса ─────────────────────────
+const TOPICS = [
+  PHONETICS, NOUN, ADJ, ADVERB, NUMERAL, PRONOUN, LEXIS,
+  VERB,
+  STUB("prichastie", "Причастие"),
+  STUB("deeprichastie", "Деепричастие"),
+  STUB("sluzhebnye", "Служебные части речи"),
+  STUB("mezhdometie", "Междометие и частица"),
+  STUB("morfemika", "Морфемика"),
+  STUB("slovoobr", "Словообразование"),
+  STUB("slovosoch", "Словосочетание"),
+  STUB("glavnye", "Главные члены предложения"),
+  STUB("skazuemoe", "Сказуемое"),
+  STUB("vtorostep", "Второстепенные члены предложения"),
+  STUB("prostoe", "Простое предложение"),
+  STUB("oslozhnennoe", "Осложнённое предложение"),
+  STUB("stili", "Стили речи"),
+  STUB("ssp", "Сложносочинённое предложение"),
+  STUB("spp", "Сложноподчинённое предложение"),
+  STUB("rech", "Прямая и косвенная речь"),
+  STUB("bsp", "Бессоюзное предложение"),
+];
+
+// ── Схемы к правилам (возвращают HTML) ────────────────────────
+function scheme(id) {
+  if (id === "vidy") {
+    return '<div class="scheme">' +
+      '<div class="scheme-col a"><div class="scheme-h">Несовершенный вид</div><div class="scheme-q">вопрос: что делать?</div><div class="scheme-r">действие ещё идёт</div><div class="scheme-r ex">читать, писать, решать</div><div class="scheme-r">есть 3 времени</div></div>' +
+      '<div class="scheme-col b"><div class="scheme-h">Совершенный вид</div><div class="scheme-q">вопрос: что сделать?</div><div class="scheme-r">действие закончено</div><div class="scheme-r ex">прочитать, написать, решить</div><div class="scheme-r">нет настоящего времени</div></div>' +
+      '<div class="scheme-tip">Запомни: <b>С</b>овершенный — <b>С</b>делать, оба на «С».</div></div>';
+  }
+  if (id === "spr") {
+    return '<div class="scheme">' +
+      '<div class="scheme-col a"><div class="scheme-h">I спряжение</div><div class="scheme-r">гласная <b>Е</b> · -ут / -ют</div><div class="scheme-r ex">читать, играть, рисовать</div></div>' +
+      '<div class="scheme-col b"><div class="scheme-h">II спряжение</div><div class="scheme-r">гласная <b>И</b> · -ат / -ят</div><div class="scheme-r">глаголы на <b>-ить</b></div><div class="scheme-r ex">строить, любить, говорить</div></div>' +
+      '<div class="scheme-tip">Исключения: 11 глаголов (смотреть, видеть, гнать…) и разноспрягаемые хотеть, бежать.</div></div>';
+  }
+  if (id === "soglasnye") {
+    return '<div class="scheme">' +
+      '<div class="scheme-col a"><div class="scheme-h">Звонкие (с голосом)</div><div class="scheme-r ex">б, в, г, д, ж, з</div></div>' +
+      '<div class="scheme-col b"><div class="scheme-h">Глухие (без голоса)</div><div class="scheme-r ex">п, ф, к, т, ш, с</div></div>' +
+      '<div class="scheme-tip">Пары: б—п, в—ф, г—к, д—т, ж—ш, з—с. Сонорные <b>л, м, н, р, й</b> — всегда звонкие, пары не имеют.</div></div>';
+  }
+  if (id === "skl") {
+    return '<div class="scheme" style="grid-template-columns:1fr 1fr 1fr">' +
+      '<div class="scheme-col a"><div class="scheme-h">1-е скл.</div><div class="scheme-r">ж. и м. род на <b>-а, -я</b></div><div class="scheme-r ex">мама, земля, дядя</div></div>' +
+      '<div class="scheme-col b"><div class="scheme-h">2-е скл.</div><div class="scheme-r">м. род без оконч.; ср. род на <b>-о, -е</b></div><div class="scheme-r ex">стол, конь, окно</div></div>' +
+      '<div class="scheme-col a"><div class="scheme-h">3-е скл.</div><div class="scheme-r">ж. род на <b>-ь</b></div><div class="scheme-r ex">ночь, дочь, степь</div></div>' +
+      '<div class="scheme-tip">Отдельно: разносклоняемые на -мя (время, имя) и слово путь.</div></div>';
+  }
+  return "";
+}
+
+// ── Вспомогательные ───────────────────────────────────────────
+function esc(s) {
+  return String(s).replace(/&/g, "&amp;").replace(/</g, "&lt;").replace(/>/g, "&gt;").replace(/"/g, "&quot;");
+}
+function shuffle(arr) {
+  var a = arr.slice();
+  for (var i = a.length - 1; i > 0; i--) {
+    var j = Math.floor(Math.random() * (i + 1));
+    var t = a[i]; a[i] = a[j]; a[j] = t;
+  }
+  return a;
+}
+function buildPool(topic, mode, subtopicIds) {
+  var pool = [];
+  topic.subtopics.forEach(function (st) {
+    if (subtopicIds && subtopicIds.indexOf(st.id) === -1) return;
+    st.questions.forEach(function (q) {
+      if (mode !== "both" && q.mode !== mode) return;
+      var c = Object.assign({}, q, { subtopicId: st.id, subtopicTitle: st.title });
+      pool.push(c);
+    });
+  });
+  return pool;
+}
+function buildQuiz(topic, opts) {
+  var mode = opts.mode, count = opts.count, subtopicIds = opts.subtopicIds, excludeIds = opts.excludeIds || [];
+  var pool = buildPool(topic, mode, subtopicIds);
+  var fresh = pool.filter(function (q) { return excludeIds.indexOf(q.id) === -1; });
+  var ordered = shuffle(fresh);
+  if (count !== "all" && ordered.length < count) {
+    var seen = shuffle(pool.filter(function (q) { return excludeIds.indexOf(q.id) !== -1; }));
+    ordered = ordered.concat(seen);
+  }
+  var n = count === "all" ? (fresh.length || pool.length) : Math.min(count, ordered.length);
+  var src = ordered.length ? ordered : shuffle(pool);
+  return src.slice(0, n);
+}
+
+// ── Состояние ─────────────────────────────────────────────────
+var S = {
+  screen: "home", topic: null, mode: "both", count: 10, selectedSubs: [],
+  quiz: [], qi: 0, results: [], seenIds: [], retrained: false,
+  sel: null, multi: [], match: [], checked: false, correct: false,
+  attempts: 0, revealed: false, resolved: false, skipped: false,
+};
+var root = document.getElementById("root");
+function findSubtopic(id) { return S.topic && S.topic.subtopics.filter(function (s) { return s.id === id; })[0]; }
+function readySubs() { return S.topic ? S.topic.subtopics.filter(function (s) { return s.questions.length > 0; }) : []; }
+function curQ() { return S.quiz[S.qi]; }
+
+function resetAnswer() {
+  S.sel = null; S.multi = []; S.match = [];
+  S.checked = false; S.correct = false;
+  S.attempts = 0; S.revealed = false; S.resolved = false; S.skipped = false;
+}
+function openTopic(t) {
+  S.topic = t; S.mode = "both"; S.count = 10;
+  S.selectedSubs = t.subtopics.filter(function (s) { return s.questions.length > 0; }).map(function (s) { return s.id; });
+  S.screen = "setup"; render();
+}
+function startQuiz(built, isRetrain) {
+  S.quiz = built; S.qi = 0; S.results = [];
+  var ids = built.map(function (x) { return x.id; });
+  ids.forEach(function (id) { if (S.seenIds.indexOf(id) === -1) S.seenIds.push(id); });
+  S.retrained = !!isRetrain;
+  resetAnswer(); S.screen = "quiz"; render();
+}
+function beginFromSetup() {
+  if (S.selectedSubs.length === 0) return;
+  var built = buildQuiz(S.topic, { mode: S.mode, count: S.count, subtopicIds: S.selectedSubs, excludeIds: [] });
+  S.seenIds = [];
+  startQuiz(built, false);
+}
+function hasAnswer() {
+  var q = curQ(); if (!q) return false;
+  if (q.type === "single" || q.type === "context") return S.sel !== null;
+  if (q.type === "multi") return S.multi.length > 0;
+  if (q.type === "match") return q.lefts.every(function (_, i) { return S.match[i] !== undefined && S.match[i] !== ""; });
+  return false;
+}
+function evaluate() {
+  var q = curQ();
+  if (q.type === "single" || q.type === "context") return S.sel === q.correct;
+  if (q.type === "multi") {
+    var a = S.multi.slice().sort().join(",");
+    var b = q.correct.slice().sort().join(",");
+    return a === b;
+  }
+  if (q.type === "match") return q.matchCorrect.every(function (c, i) { return Number(S.match[i]) === c; });
+  return false;
+}
+function check() {
+  var q = curQ();
+  var ok = evaluate();
+  S.checked = true; S.correct = ok;
+  if (S.attempts === 0) S.results.push({ qid: q.id, subtopicId: q.subtopicId, correct: ok });
+  S.attempts += 1;
+  if (ok) S.resolved = true; else S.revealed = true;
+  render();
+}
+function retry() {
+  S.checked = false; S.correct = false;
+  S.sel = null; S.multi = []; S.match = [];
+  render();
+}
+function skip() { S.skipped = true; S.resolved = true; S.checked = true; render(); }
+function next() {
+  if (S.qi + 1 >= S.quiz.length) { S.screen = "result"; }
+  else { S.qi += 1; resetAnswer(); }
+  render();
+}
+function breakdown() {
+  var map = {};
+  S.results.forEach(function (r) {
+    if (!map[r.subtopicId]) map[r.subtopicId] = { total: 0, ok: 0 };
+    map[r.subtopicId].total++; if (r.correct) map[r.subtopicId].ok++;
+  });
+  return Object.keys(map).map(function (id) {
+    var v = map[id]; var st = findSubtopic(id);
+    return { id: id, title: st ? st.title : id, total: v.total, ok: v.ok, wrong: v.total - v.ok };
+  });
+}
+function retrainWeak() {
+  var weak = breakdown().filter(function (b) { return b.wrong > 0; }).map(function (b) { return b.id; });
+  var built = buildQuiz(S.topic, { mode: S.mode, count: "all", subtopicIds: weak, excludeIds: S.seenIds });
+  startQuiz(built, true);
+}
+
+var KIND = { theory: "теория", practice: "практика" };
+
+// ── Рендер ────────────────────────────────────────────────────
+function render() {
+  var h = "";
+  // header
+  h += '<div class="rt-top"><div class="rt-logo">Русский<b>·</b>ЕНТ</div>';
+  if (S.screen !== "home") h += '<button class="rt-back" data-act="home">← К темам</button>';
+  h += '</div>';
+
+  if (S.screen === "home") h += viewHome();
+  else if (S.screen === "setup") h += viewSetup();
+  else if (S.screen === "quiz") h += viewQuiz();
+  else if (S.screen === "result") h += viewResult();
+
+  root.innerHTML = h;
+  wire();
+}
+
+function viewHome() {
+  var h = '<h1 class="rt-h1">Тренажёр по русскому языку</h1>';
+  h += '<p class="rt-lead">Темы идут в порядке курса. Выбери тему — дальше можно настроить режим и число вопросов. При ошибке откроется разбор с простым объяснением и правилом.</p>';
+  h += '<div class="rt-topics">';
+  TOPICS.forEach(function (t) {
+    var ready = t.subtopics.some(function (s) { return s.questions.length > 0; });
+    h += '<button class="rt-topic' + (ready ? " ready" : "") + '"' + (ready ? ' data-topic="' + t.id + '"' : "") + '>' +
+      '<div class="name">' + esc(t.title) + '</div>' +
+      '<div class="meta">' + (ready ? "готово · начать" : "скоро") + '</div></button>';
+  });
+  h += '</div>';
+  return h;
+}
+
+function viewSetup() {
+  var rs = readySubs();
+  var h = '<h1 class="rt-h1">' + esc(S.topic.title) + '</h1>';
+  h += '<p class="rt-lead">Настрой тренировку под себя.</p>';
+  h += '<div class="rt-card">';
+  h += '<div class="rt-setup-h" style="margin-top:0">Какие темы?</div><div class="rt-choices">';
+  h += '<button class="rt-choice' + (S.selectedSubs.length === rs.length ? " sel" : "") + '" data-all>Все темы</button>';
+  S.topic.subtopics.forEach(function (st) {
+    if (st.questions.length === 0) {
+      h += '<button class="rt-choice soon" disabled>' + esc(st.title) + '<span class="sub">скоро</span></button>';
+    } else {
+      var on = S.selectedSubs.indexOf(st.id) !== -1;
+      h += '<button class="rt-choice' + (on ? " sel" : "") + '" data-sub="' + st.id + '">' + esc(st.title) + '</button>';
+    }
+  });
+  h += '</div>';
+
+  h += '<div class="rt-setup-h">Что тренируем?</div><div class="rt-choices">';
+  [["theory", "Теория", "правила"], ["practice", "Практика", "примеры"], ["both", "Вместе", "теория + практика"]].forEach(function (m) {
+    h += '<button class="rt-choice' + (S.mode === m[0] ? " sel" : "") + '" data-mode="' + m[0] + '">' + m[1] + '<span class="sub">' + m[2] + '</span></button>';
+  });
+  h += '</div>';
+
+  h += '<div class="rt-setup-h">Сколько вопросов?</div><div class="rt-choices">';
+  [5, 10, 20, "all"].forEach(function (c) {
+    h += '<button class="rt-choice' + (S.count === c ? " sel" : "") + '" data-count="' + c + '">' + (c === "all" ? "Все" : c) + '</button>';
+  });
+  h += '</div>';
+
+  var none = S.selectedSubs.length === 0;
+  h += '<button class="rt-start" data-start' + (none ? " disabled" : "") + '>' + (none ? "Выберите хотя бы одну тему" : "Начать тренировку") + '</button>';
+  h += '</div>';
+  return h;
+}
+
+function viewQuiz() {
+  var q = curQ();
+  var h = '<div class="rt-prog"><div class="rt-bar"><i style="width:' + ((S.qi / S.quiz.length) * 100) + '%"></i></div>' +
+    '<span class="rt-num">' + (S.qi + 1) + ' / ' + S.quiz.length + '</span></div>';
+  h += '<div class="rt-q">';
+  h += '<div class="rt-tags"><span class="rt-tag">' + esc(q.subtopicTitle) + '</span>' +
+    '<span class="rt-tag">' + KIND[q.mode] + '</span>' +
+    '<span class="rt-tag lvl">уровень ' + q.level + '</span></div>';
+  if (q.type === "context") h += '<div class="rt-ctx">' + esc(q.context) + '</div>';
+  h += '<p class="rt-prompt">' + esc(q.prompt) + '</p>';
+
+  var reveal = S.correct || S.skipped;
+  if (q.type === "single" || q.type === "context") {
+    h += '<div class="rt-opts">';
+    q.options.forEach(function (opt, i) {
+      var c = "rt-opt rad";
+      if (!S.checked && S.sel === i) c += " sel";
+      if (reveal && i === q.correct) c += " ok";
+      if (S.checked && !S.correct && S.sel === i && i !== q.correct) c += " bad";
+      h += '<button class="' + c + '"' + (S.checked ? " disabled" : "") + ' data-opt="' + i + '"><span class="mk"></span>' + esc(opt) + '</button>';
+    });
+    h += '</div>';
+  } else if (q.type === "multi") {
+    h += '<div class="rt-opts">';
+    q.options.forEach(function (opt, i) {
+      var on = S.multi.indexOf(i) !== -1;
+      var c = "rt-opt chk";
+      if (!S.checked && on) c += " sel";
+      if (reveal && q.correct.indexOf(i) !== -1) c += " ok";
+      if (S.checked && !S.correct && on && q.correct.indexOf(i) === -1) c += " bad";
+      h += '<button class="' + c + '"' + (S.checked ? " disabled" : "") + ' data-multi="' + i + '"><span class="mk"></span>' + esc(opt) + '</button>';
+    });
+    h += '</div>';
+  } else if (q.type === "match") {
+    h += '<div class="rt-match">';
+    q.lefts.forEach(function (lf, i) {
+      var c = "";
+      if (reveal && Number(S.match[i]) === q.matchCorrect[i]) c = "ok";
+      else if (S.checked && !S.correct && Number(S.match[i]) !== q.matchCorrect[i]) c = "bad";
+      var opts = '<option value="" disabled' + (S.match[i] === undefined || S.match[i] === "" ? " selected" : "") + '>выберите…</option>';
+      q.matchOptions.forEach(function (o, oi) {
+        opts += '<option value="' + oi + '"' + (String(S.match[i]) === String(oi) ? " selected" : "") + '>' + esc(o) + '</option>';
+      });
+      h += '<div class="rt-mrow"><span class="lf">' + esc(lf) + '</span>' +
+        '<select class="' + c + '"' + (S.checked ? " disabled" : "") + ' data-match="' + i + '">' + opts + '</select></div>';
+    });
+    h += '</div>';
+  }
+
+  if (S.checked) {
+    var msg;
+    if (S.correct) msg = "Верно. " + q.answerText;
+    else if (S.skipped) msg = "Вопрос пропущен. Правильный ответ: " + q.answerText;
+    else msg = "Неверно. Прочитайте правило ниже и ответьте ещё раз.";
+    h += '<div class="rt-fb ' + (S.correct ? "ok" : "bad") + '">' + esc(msg) + '</div>';
+  }
+
+  if (S.revealed) {
+    var st = findSubtopic(q.subtopicId);
+    var simple = q.explain || st.rule.simple;
+    h += '<div class="rt-rule">' +
+      '<div class="rt-rule-cta">Ознакомьтесь с правилом и пройдите вопрос заново</div>' +
+      '<p class="rt-simple">' + esc(simple) + '</p>' +
+      '<div class="rt-full">' + esc(st.rule.full) + '</div>';
+    if (st.rule.scheme) h += scheme(st.rule.scheme);
+    h += '</div>';
+  }
+
+  h += '<div class="rt-act">';
+  if (!S.checked) {
+    h += '<button class="rt-btn" data-check' + (hasAnswer() ? "" : " disabled") + '>Проверить</button>';
+  } else if (S.resolved) {
+    h += '<button class="rt-btn" data-next>' + (S.qi + 1 >= S.quiz.length ? "Завершить" : "Дальше →") + '</button>';
+  } else {
+    if (S.attempts >= 2) h += '<button class="rt-btn ghost" data-skip>Пропустить вопрос</button>';
+    h += '<button class="rt-btn" data-retry>Ответить ещё раз</button>';
+  }
+  h += '</div></div>';
+  return h;
+}
+
+function viewResult() {
+  var bd = breakdown();
+  var weak = bd.filter(function (b) { return b.wrong > 0; });
+  var scoreOk = S.results.filter(function (r) { return r.correct; }).length;
+  var h = '<div class="rt-result">';
+  h += '<div class="rt-score">' + (S.retrained ? "Тренировка слабых мест" : esc(S.topic.title)) +
+    '<span class="big"><b>' + scoreOk + '</b> / ' + S.results.length + '</span>' +
+    (scoreOk === S.results.length ? "Всё верно — отличная работа!" : "Разбор по подтемам ниже.") + '</div>';
+
+  h += '<div class="rt-break"><h4>Где были ошибки</h4>';
+  bd.forEach(function (b) {
+    var pct = b.total ? (b.ok / b.total) * 100 : 0;
+    var col = b.wrong === 0 ? "var(--ok)" : (pct >= 50 ? "var(--brand)" : "var(--err)");
+    h += '<div class="rt-brow"><div class="rt-brow-top"><span class="st">' + esc(b.title) + '</span>' +
+      '<span class="sc">' + b.ok + ' из ' + b.total + '</span></div>' +
+      '<div class="rt-brow-bar"><i style="width:' + pct + '%;background:' + col + '"></i></div></div>';
+  });
+  h += '</div>';
+
+  if (weak.length > 0) {
+    h += '<div class="rt-weak-note">Слабые места: ' + esc(weak.map(function (b) { return b.title; }).join(", ")) +
+      '. Можно потренировать их отдельно — с другими примерами.</div>';
+  } else {
+    h += '<div class="rt-strong-note">Слабых мест нет — можно двигаться к следующей теме.</div>';
+  }
+
+  h += '<div class="rt-result-btns">';
+  if (weak.length > 0) h += '<button class="rt-btn" data-retrain>Потренировать слабые места</button>';
+  h += '<button class="rt-btn ghost" data-act="setup">Новая тренировка</button>';
+  h += '<button class="rt-btn ghost" data-act="home">К темам</button>';
+  h += '</div></div>';
+  return h;
+}
+
+// ── Обработчики событий ───────────────────────────────────────
+function wire() {
+  root.querySelectorAll("[data-topic]").forEach(function (el) {
+    el.addEventListener("click", function () {
+      var t = TOPICS.filter(function (x) { return x.id === el.getAttribute("data-topic"); })[0];
+      if (t) openTopic(t);
+    });
+  });
+  root.querySelectorAll("[data-act]").forEach(function (el) {
+    el.addEventListener("click", function () {
+      var a = el.getAttribute("data-act");
+      if (a === "home") { S.screen = "home"; render(); }
+      else if (a === "setup") { S.screen = "setup"; render(); }
+    });
+  });
+
+  var allBtn = root.querySelector("[data-all]");
+  if (allBtn) allBtn.addEventListener("click", function () {
+    S.selectedSubs = readySubs().map(function (s) { return s.id; }); render();
+  });
+  root.querySelectorAll("[data-sub]").forEach(function (el) {
+    el.addEventListener("click", function () {
+      var id = el.getAttribute("data-sub");
+      var i = S.selectedSubs.indexOf(id);
+      if (i === -1) S.selectedSubs.push(id); else S.selectedSubs.splice(i, 1);
+      render();
+    });
+  });
+  root.querySelectorAll("[data-mode]").forEach(function (el) {
+    el.addEventListener("click", function () { S.mode = el.getAttribute("data-mode"); render(); });
+  });
+  root.querySelectorAll("[data-count]").forEach(function (el) {
+    el.addEventListener("click", function () {
+      var v = el.getAttribute("data-count"); S.count = (v === "all" ? "all" : Number(v)); render();
+    });
+  });
+  var startBtn = root.querySelector("[data-start]");
+  if (startBtn) startBtn.addEventListener("click", beginFromSetup);
+
+  root.querySelectorAll("[data-opt]").forEach(function (el) {
+    el.addEventListener("click", function () { S.sel = Number(el.getAttribute("data-opt")); render(); });
+  });
+  root.querySelectorAll("[data-multi]").forEach(function (el) {
+    el.addEventListener("click", function () {
+      var i = Number(el.getAttribute("data-multi"));
+      var k = S.multi.indexOf(i);
+      if (k === -1) S.multi.push(i); else S.multi.splice(k, 1);
+      render();
+    });
+  });
+  root.querySelectorAll("[data-match]").forEach(function (el) {
+    el.addEventListener("change", function () {
+      S.match[Number(el.getAttribute("data-match"))] = el.value; render();
+    });
+  });
+
+  var cb = root.querySelector("[data-check]"); if (cb) cb.addEventListener("click", function () { if (hasAnswer()) check(); });
+  var nb = root.querySelector("[data-next]"); if (nb) nb.addEventListener("click", next);
+  var rb = root.querySelector("[data-retry]"); if (rb) rb.addEventListener("click", retry);
+  var sb = root.querySelector("[data-skip]"); if (sb) sb.addEventListener("click", skip);
+  var tb = root.querySelector("[data-retrain]"); if (tb) tb.addEventListener("click", retrainWeak);
+}
+
+render();
+</script>
+</body>
+</html>
