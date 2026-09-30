@@ -53,20 +53,6 @@ html,body{margin:0;padding:0;}
 .rt-hint{margin-top:10px;font-size:13px;color:var(--muted);}
 .rt-choice.soon{opacity:.5;cursor:default;}
 .rt-choice.soon .sub{color:var(--muted);}
-.rt-suggest-link{display:block;width:100%;margin-top:18px;border:1px dashed var(--brand-100);background:var(--surface);color:var(--brand-deep);font:inherit;font-size:15px;font-weight:600;padding:14px;border-radius:12px;cursor:pointer;}
-.rt-suggest-link:hover{border-color:var(--brand);background:var(--brand-050);}
-.rt-input{width:100%;padding:12px 14px;border:1.5px solid var(--line);border-radius:10px;font:inherit;font-size:15px;}
-.rt-input:focus{outline:none;border-color:var(--brand);}
-.rt-ta{width:100%;min-height:110px;padding:12px 14px;border:1.5px solid var(--line);border-radius:10px;font:inherit;font-size:15px;resize:vertical;line-height:1.5;}
-.rt-ta:focus{outline:none;border-color:var(--brand);}
-.rt-appeal{margin-top:16px;border-top:1px solid var(--line);padding-top:14px;}
-.rt-appeal-toggle{border:none;background:none;color:var(--muted);font:inherit;font-size:13.5px;font-weight:600;cursor:pointer;padding:4px 0;}
-.rt-appeal-toggle:hover{color:var(--err);}
-.rt-appeal-box{background:var(--paper);border-radius:12px;padding:15px;}
-.rt-appeal-h{font-size:14px;font-weight:700;margin-bottom:10px;}
-.rt-appeal-btns{display:flex;gap:10px;justify-content:flex-end;margin-top:10px;}
-.rt-appeal-err{color:var(--err);font-size:13px;margin-top:6px;}
-.rt-appeal-done{background:var(--ok-bg);color:#127049;border-radius:10px;padding:11px 14px;font-size:14px;font-weight:500;}
 
 /* quiz */
 .rt-prog{display:flex;align-items:center;gap:12px;margin-bottom:20px;}
@@ -1887,6 +1873,153 @@ EXTRA_VERB.forEach(function (e) {
   if (st) st.questions.push(e.q);
 });
 
+
+// ── Глагол: наполнение 5 оставшихся подтем (правила + 10/10) ──
+var RULES_VERB2 = {
+  "vremya": {
+    simple: "Время глагола показывает, когда происходит действие. Настоящее — сейчас (читаю), прошедшее — раньше (читал), будущее — потом (буду читать / прочитаю).",
+    full: "Глаголы изменяются по временам.\n\nНастоящее время — действие происходит сейчас; вопрос что делаю? что делает?: читаю, идёт. Есть только у глаголов несовершенного вида.\n\nПрошедшее время — действие было раньше; вопрос что делал? что сделал?: читал, прочитал. Образуется с суффиксом -л-, изменяется по родам и числам (читал, читала, читали).\n\nБудущее время — действие будет потом. У несовершенного вида — сложное (буду читать), у совершенного — простое (прочитаю).",
+  },
+  "naklonenie": {
+    simple: "Наклонение показывает, как действие относится к реальности. Изъявительное — действие реально (читаю, читал, прочитаю). Повелительное — просьба или приказ (читай!). Условное — действие возможно при условии, с частицей бы (читал бы).",
+    full: "Наклонение глагола выражает отношение действия к действительности.\n\nИзъявительное наклонение — действие происходит, происходило или будет происходить на самом деле: читаю, читал, прочитаю. Только оно изменяется по временам.\n\nПовелительное наклонение — побуждение к действию (просьба, приказ, совет): читай, читайте, сядьте.\n\nУсловное (сослагательное) наклонение — действие желаемое или возможное при условии; образуется: глагол прошедшего времени + частица бы (б): читал бы, пришёл бы.",
+  },
+  "raznospr": {
+    simple: "Разноспрягаемые глаголы спрягаются частью по I, частью по II спряжению. Их немного: хотеть, бежать, чтить. Например: хочу, хочешь, хочет (как I), но хотим, хотите, хотят (как II).",
+    full: "Разноспрягаемые глаголы имеют окончания и I, и II спряжения.\n\nК ним относятся: хотеть, бежать, чтить (и производные — захотеть, прибежать).\n\nГлагол хотеть: в единственном числе — окончания I спряжения (хочу, хочешь, хочет), во множественном — II спряжения (хотим, хотите, хотят).\n\nГлагол бежать: бежишь, бежит, бежим, бежите — по II спряжению, но бегут — по I.\n\nОсобо стоят глаголы есть и дать — они спрягаются по-особому (архаичное спряжение).",
+  },
+  "zalog": {
+    simple: "Залог показывает, кто выполняет действие. Действительный — предмет сам действует (мальчик читает книгу). Страдательный — над предметом выполняют действие (книга читается мальчиком).",
+    full: "Залог показывает отношение действия к тому, кто его выполняет.\n\nДействительный залог — подлежащее само выполняет действие: Рабочие строят дом. Ученик решает задачу.\n\nСтрадательный залог — подлежащее испытывает действие со стороны: Дом строится рабочими. Задача решается учеником. Часто выражается возвратными глаголами (на -ся) или краткими страдательными причастиями (дом построен).\n\nОдну мысль можно выразить обоими залогами: Рабочие строят дом (действительный) — Дом строится рабочими (страдательный).",
+  },
+  "dvizhenie": {
+    simple: "Глаголы движения называют перемещение и образуют пары: однонаправленные — движение в одну сторону сейчас (идти, ехать, бежать, лететь), и разнонаправленные — движение вообще, туда-сюда, регулярно (ходить, ездить, бегать, летать).",
+    full: "Глаголы движения обозначают перемещение в пространстве и образуют пары.\n\nОднонаправленные — движение в одном направлении, в один момент: идти, ехать, бежать, лететь, плыть, нести, вести, везти. «Я иду в школу» (сейчас, в одну сторону).\n\nРазнонаправленные — движение туда и обратно, вообще, обычно: ходить, ездить, бегать, летать, плавать, носить, водить, возить. «Я хожу в школу» (регулярно).\n\nПары: идти — ходить, ехать — ездить, бежать — бегать, лететь — летать, плыть — плавать.",
+  },
+};
+(function () {
+  var t = TOPICS.filter(function (x) { return x.id === "verb"; })[0];
+  if (!t) return;
+  Object.keys(RULES_VERB2).forEach(function (id) {
+    var st = t.subtopics.filter(function (s) { return s.id === id; })[0];
+    if (st) st.rule = RULES_VERB2[id];
+  });
+})();
+
+var EXTRA_VERB2 = [
+  // Время (10/10)
+  { sub: "vremya", q: { id: "vr-t1", type: "single", mode: "theory", level: "A", prompt: "Сколько времён у глагола?", options: ["три", "два", "одно", "четыре"], correct: 0, answerText: "три (настоящее, прошедшее, будущее)" } },
+  { sub: "vremya", q: { id: "vr-t2", type: "single", mode: "theory", level: "A", prompt: "Настоящее время отвечает на вопрос…", options: ["что делаю? что делает?", "что делал?", "что сделаю?", "какой?"], correct: 0, answerText: "что делаю? что делает?" } },
+  { sub: "vremya", q: { id: "vr-t3", type: "single", mode: "theory", level: "A", prompt: "Прошедшее время отвечает на вопрос…", options: ["что делал? что сделал?", "что делаю?", "что буду делать?", "какой?"], correct: 0, answerText: "что делал? что сделал?" } },
+  { sub: "vremya", q: { id: "vr-t4", type: "single", mode: "theory", level: "A", prompt: "Будущее время отвечает на вопрос…", options: ["что сделаю? что буду делать?", "что делаю?", "что делал?", "какой?"], correct: 0, answerText: "что сделаю? что буду делать?" } },
+  { sub: "vremya", q: { id: "vr-t5", type: "single", mode: "theory", level: "B", prompt: "У какого вида есть настоящее время?", options: ["у несовершенного", "у совершенного", "у обоих", "ни у одного"], correct: 0, answerText: "у несовершенного" } },
+  { sub: "vremya", q: { id: "vr-t6", type: "single", mode: "theory", level: "B", prompt: "С каким суффиксом образуется прошедшее время?", options: ["-л-", "-ть", "-ешь", "-ущ-"], correct: 0, answerText: "-л-" } },
+  { sub: "vremya", q: { id: "vr-t7", type: "single", mode: "theory", level: "B", prompt: "По чему изменяются глаголы в прошедшем времени?", options: ["по родам и числам", "по лицам", "по падежам", "по склонениям"], correct: 0, answerText: "по родам и числам" } },
+  { sub: "vremya", q: { id: "vr-t8", type: "single", mode: "theory", level: "C", prompt: "Будущее сложное (буду читать) — у глаголов какого вида?", options: ["несовершенного", "совершенного", "обоих", "ни одного"], correct: 0, answerText: "несовершенного" } },
+  { sub: "vremya", q: { id: "vr-t9", type: "single", mode: "theory", level: "C", prompt: "Будущее простое (прочитаю) — у глаголов какого вида?", options: ["совершенного", "несовершенного", "обоих", "ни одного"], correct: 0, answerText: "совершенного" } },
+  { sub: "vremya", q: { id: "vr-t10", type: "single", mode: "theory", level: "A", prompt: "Время глагола показывает…", options: ["когда происходит действие", "кто действует", "сколько предметов", "какой признак"], correct: 0, answerText: "когда происходит действие" } },
+  { sub: "vremya", q: { id: "vr-p1", type: "single", mode: "practice", level: "A", prompt: "Укажите глагол настоящего времени.", options: ["читаю", "читал", "прочитаю", "читать"], correct: 0, answerText: "читаю" } },
+  { sub: "vremya", q: { id: "vr-p2", type: "single", mode: "practice", level: "A", prompt: "Укажите глагол прошедшего времени.", options: ["писал", "пишу", "напишу", "писать"], correct: 0, answerText: "писал" } },
+  { sub: "vremya", q: { id: "vr-p3", type: "single", mode: "practice", level: "A", prompt: "Укажите глагол будущего времени.", options: ["нарисую", "рисую", "рисовал", "рисовать"], correct: 0, answerText: "нарисую" } },
+  { sub: "vremya", q: { id: "vr-p4", type: "single", mode: "practice", level: "B", prompt: "Определите время: «Дети играют во дворе».", options: ["настоящее", "прошедшее", "будущее", "нельзя определить"], correct: 0, answerText: "настоящее" } },
+  { sub: "vremya", q: { id: "vr-p5", type: "single", mode: "practice", level: "B", prompt: "Определите время: «Мы ходили в кино».", options: ["прошедшее", "настоящее", "будущее", "нельзя определить"], correct: 0, answerText: "прошедшее" } },
+  { sub: "vremya", q: { id: "vr-p6", type: "single", mode: "practice", level: "B", prompt: "Определите время: «Завтра я пойду в школу».", options: ["будущее", "настоящее", "прошедшее", "нельзя определить"], correct: 0, answerText: "будущее" } },
+  { sub: "vremya", q: { id: "vr-p7", type: "multi", mode: "practice", level: "B", prompt: "Отметьте глаголы прошедшего времени.", options: ["читал", "пишу", "гулял", "бегу", "смотрел", "играю"], correct: [0, 2, 4], answerText: "читал, гулял, смотрел" } },
+  { sub: "vremya", q: { id: "vr-p8", type: "single", mode: "practice", level: "B", prompt: "Образуйте будущее время от «читать».", options: ["буду читать", "читаю", "читал", "читая"], correct: 0, answerText: "буду читать" } },
+  { sub: "vremya", q: { id: "vr-p9", type: "single", mode: "practice", level: "B", prompt: "В каком роде глагол «писала»?", options: ["женском", "мужском", "среднем", "нельзя определить"], correct: 0, answerText: "женском" } },
+  { sub: "vremya", q: { id: "vr-p10", type: "match", mode: "practice", level: "C", prompt: "Определите время глагола.", lefts: ["иду", "шёл"], matchOptions: ["настоящее", "прошедшее", "будущее", "инфинитив"], matchCorrect: [0, 1], answerText: "иду — настоящее, шёл — прошедшее" } },
+  // Наклонение (10/10)
+  { sub: "naklonenie", q: { id: "nk-t1", type: "single", mode: "theory", level: "A", prompt: "Сколько наклонений у глагола?", options: ["три", "два", "одно", "четыре"], correct: 0, answerText: "три" } },
+  { sub: "naklonenie", q: { id: "nk-t2", type: "single", mode: "theory", level: "A", prompt: "Изъявительное наклонение обозначает действие…", options: ["реальное", "желаемое", "приказ", "невозможное"], correct: 0, answerText: "реальное" } },
+  { sub: "naklonenie", q: { id: "nk-t3", type: "single", mode: "theory", level: "A", prompt: "Повелительное наклонение выражает…", options: ["просьбу или приказ", "реальное действие", "условие", "вопрос"], correct: 0, answerText: "просьбу или приказ" } },
+  { sub: "naklonenie", q: { id: "nk-t4", type: "single", mode: "theory", level: "A", prompt: "Условное наклонение образуется с частицей…", options: ["бы (б)", "не", "ни", "же"], correct: 0, answerText: "бы (б)" } },
+  { sub: "naklonenie", q: { id: "nk-t5", type: "single", mode: "theory", level: "B", prompt: "Какое наклонение изменяется по временам?", options: ["изъявительное", "повелительное", "условное", "все"], correct: 0, answerText: "изъявительное" } },
+  { sub: "naklonenie", q: { id: "nk-t6", type: "single", mode: "theory", level: "A", prompt: "«Читай!» — какое наклонение?", options: ["повелительное", "изъявительное", "условное", "инфинитив"], correct: 0, answerText: "повелительное" } },
+  { sub: "naklonenie", q: { id: "nk-t7", type: "single", mode: "theory", level: "A", prompt: "«Читал бы» — какое наклонение?", options: ["условное", "изъявительное", "повелительное", "инфинитив"], correct: 0, answerText: "условное" } },
+  { sub: "naklonenie", q: { id: "nk-t8", type: "single", mode: "theory", level: "A", prompt: "«Читаю» — какое наклонение?", options: ["изъявительное", "повелительное", "условное", "инфинитив"], correct: 0, answerText: "изъявительное" } },
+  { sub: "naklonenie", q: { id: "nk-t9", type: "single", mode: "theory", level: "B", prompt: "Условное наклонение обозначает действие…", options: ["возможное или желаемое", "реально происходящее", "приказ", "вопрос"], correct: 0, answerText: "возможное или желаемое" } },
+  { sub: "naklonenie", q: { id: "nk-t10", type: "single", mode: "theory", level: "C", prompt: "Повелительное наклонение часто оканчивается на…", options: ["-и, -йте (пиши, читайте)", "-л", "-ть", "-ешь"], correct: 0, answerText: "-и, -йте" } },
+  { sub: "naklonenie", q: { id: "nk-p1", type: "single", mode: "practice", level: "A", prompt: "Укажите глагол в повелительном наклонении.", options: ["пиши", "пишу", "писал", "написал бы"], correct: 0, answerText: "пиши" } },
+  { sub: "naklonenie", q: { id: "nk-p2", type: "single", mode: "practice", level: "A", prompt: "Укажите глагол в условном наклонении.", options: ["пришёл бы", "приду", "пришёл", "приходи"], correct: 0, answerText: "пришёл бы" } },
+  { sub: "naklonenie", q: { id: "nk-p3", type: "single", mode: "practice", level: "A", prompt: "Укажите глагол в изъявительном наклонении.", options: ["читаю", "читай", "читал бы", "читайте"], correct: 0, answerText: "читаю" } },
+  { sub: "naklonenie", q: { id: "nk-p4", type: "single", mode: "practice", level: "B", prompt: "Определите наклонение: «Открой окно».", options: ["повелительное", "изъявительное", "условное", "инфинитив"], correct: 0, answerText: "повелительное" } },
+  { sub: "naklonenie", q: { id: "nk-p5", type: "single", mode: "practice", level: "B", prompt: "Определите наклонение: «Я бы поехал на море».", options: ["условное", "изъявительное", "повелительное", "инфинитив"], correct: 0, answerText: "условное" } },
+  { sub: "naklonenie", q: { id: "nk-p6", type: "single", mode: "practice", level: "B", prompt: "Определите наклонение: «Солнце светит ярко».", options: ["изъявительное", "повелительное", "условное", "инфинитив"], correct: 0, answerText: "изъявительное" } },
+  { sub: "naklonenie", q: { id: "nk-p7", type: "multi", mode: "practice", level: "C", prompt: "Отметьте глаголы в повелительном наклонении.", options: ["читай", "читаю", "пишите", "писал", "сядь", "сидел"], correct: [0, 2, 4], answerText: "читай, пишите, сядь" } },
+  { sub: "naklonenie", q: { id: "nk-p8", type: "single", mode: "practice", level: "B", prompt: "Как образовать условное наклонение от «пойти»?", options: ["пошёл бы", "пойду", "пойди", "идёт"], correct: 0, answerText: "пошёл бы" } },
+  { sub: "naklonenie", q: { id: "nk-p9", type: "single", mode: "practice", level: "B", prompt: "«Сделайте задание» — какое наклонение?", options: ["повелительное", "изъявительное", "условное", "инфинитив"], correct: 0, answerText: "повелительное" } },
+  { sub: "naklonenie", q: { id: "nk-p10", type: "match", mode: "practice", level: "C", prompt: "Определите наклонение.", lefts: ["читай", "читал бы"], matchOptions: ["повелительное", "условное", "изъявительное", "инфинитив"], matchCorrect: [0, 1], answerText: "читай — повелительное, читал бы — условное" } },
+  // Разноспрягаемые (10/10)
+  { sub: "raznospr", q: { id: "rs-t1", type: "single", mode: "theory", level: "B", prompt: "Разноспрягаемые глаголы спрягаются…", options: ["частью по I, частью по II спряжению", "только по I", "только по II", "не спрягаются"], correct: 0, answerText: "частью по I, частью по II спряжению" } },
+  { sub: "raznospr", q: { id: "rs-t2", type: "single", mode: "theory", level: "A", prompt: "Какой глагол разноспрягаемый?", options: ["хотеть", "читать", "строить", "играть"], correct: 0, answerText: "хотеть" } },
+  { sub: "raznospr", q: { id: "rs-t3", type: "single", mode: "theory", level: "A", prompt: "Какой глагол разноспрягаемый?", options: ["бежать", "писать", "любить", "гулять"], correct: 0, answerText: "бежать" } },
+  { sub: "raznospr", q: { id: "rs-t4", type: "single", mode: "theory", level: "B", prompt: "Сколько основных разноспрягаемых глаголов?", options: ["немного (хотеть, бежать, чтить)", "десять", "сто", "ни одного"], correct: 0, answerText: "немного (хотеть, бежать, чтить)" } },
+  { sub: "raznospr", q: { id: "rs-t5", type: "single", mode: "theory", level: "B", prompt: "Глагол «хотеть» в единственном числе имеет окончания…", options: ["I спряжения", "II спряжения", "обоих сразу", "никаких"], correct: 0, answerText: "I спряжения" } },
+  { sub: "raznospr", q: { id: "rs-t6", type: "single", mode: "theory", level: "B", prompt: "Глагол «хотеть» во множественном числе имеет окончания…", options: ["II спряжения", "I спряжения", "обоих", "никаких"], correct: 0, answerText: "II спряжения" } },
+  { sub: "raznospr", q: { id: "rs-t7", type: "single", mode: "theory", level: "C", prompt: "Форма «хотят» — по какому спряжению?", options: ["II", "I", "разному", "никакому"], correct: 0, answerText: "II" } },
+  { sub: "raznospr", q: { id: "rs-t8", type: "single", mode: "theory", level: "C", prompt: "Форма «бегут» — по какому спряжению?", options: ["I", "II", "разному", "никакому"], correct: 0, answerText: "I" } },
+  { sub: "raznospr", q: { id: "rs-t9", type: "single", mode: "theory", level: "B", prompt: "Почему глагол «хотеть» называют разноспрягаемым?", options: ["имеет окончания и I, и II спряжения", "не изменяется", "только II спр.", "только I спр."], correct: 0, answerText: "имеет окончания и I, и II спряжения" } },
+  { sub: "raznospr", q: { id: "rs-t10", type: "single", mode: "theory", level: "C", prompt: "Какие глаголы спрягаются особо (архаично)?", options: ["есть, дать", "только хотеть", "только бежать", "читать, писать"], correct: 0, answerText: "есть, дать" } },
+  { sub: "raznospr", q: { id: "rs-p1", type: "single", mode: "practice", level: "A", prompt: "Укажите разноспрягаемый глагол.", options: ["хотеть", "читать", "строить", "рисовать"], correct: 0, answerText: "хотеть" } },
+  { sub: "raznospr", q: { id: "rs-p2", type: "single", mode: "practice", level: "A", prompt: "Укажите разноспрягаемый глагол.", options: ["бежать", "играть", "любить", "писать"], correct: 0, answerText: "бежать" } },
+  { sub: "raznospr", q: { id: "rs-p3", type: "single", mode: "practice", level: "B", prompt: "Форма «хочешь» — по какому спряжению?", options: ["I спряжение", "II спряжение", "разноспрягаемый целиком", "безличный"], correct: 0, answerText: "I спряжение" } },
+  { sub: "raznospr", q: { id: "rs-p4", type: "single", mode: "practice", level: "B", prompt: "Форма «хотим» — по какому спряжению?", options: ["II спряжение", "I спряжение", "безличный", "никакое"], correct: 0, answerText: "II спряжение" } },
+  { sub: "raznospr", q: { id: "rs-p5", type: "multi", mode: "practice", level: "C", prompt: "Отметьте разноспрягаемые глаголы.", options: ["хотеть", "читать", "бежать", "играть", "чтить", "строить"], correct: [0, 2, 4], answerText: "хотеть, бежать, чтить" } },
+  { sub: "raznospr", q: { id: "rs-p6", type: "single", mode: "practice", level: "B", prompt: "Какой глагол НЕ разноспрягаемый?", options: ["читать", "хотеть", "бежать", "чтить"], correct: 0, answerText: "читать" } },
+  { sub: "raznospr", q: { id: "rs-p7", type: "single", mode: "practice", level: "B", prompt: "Вставьте: «Они … домой» (бежать).", options: ["бегут", "бежат", "бегим", "бежут"], correct: 0, answerText: "бегут" } },
+  { sub: "raznospr", q: { id: "rs-p8", type: "single", mode: "practice", level: "B", prompt: "Вставьте: «Мы … пить» (хотеть).", options: ["хотим", "хочем", "хотем", "хочим"], correct: 0, answerText: "хотим" } },
+  { sub: "raznospr", q: { id: "rs-p9", type: "single", mode: "practice", level: "B", prompt: "Вставьте: «Он … учиться» (хотеть).", options: ["хочет", "хотит", "хочит", "хотет"], correct: 0, answerText: "хочет" } },
+  { sub: "raznospr", q: { id: "rs-p10", type: "match", mode: "practice", level: "C", prompt: "Определите, по какому спряжению форма.", lefts: ["хочет", "хотят"], matchOptions: ["I спряжение", "II спряжение", "безличное", "инфинитив"], matchCorrect: [0, 1], answerText: "хочет — I, хотят — II" } },
+  // Залог (10/10)
+  { sub: "zalog", q: { id: "zl-t1", type: "single", mode: "theory", level: "A", prompt: "Что показывает залог глагола?", options: ["кто выполняет действие", "когда происходит действие", "сколько предметов", "какой признак"], correct: 0, answerText: "кто выполняет действие" } },
+  { sub: "zalog", q: { id: "zl-t2", type: "single", mode: "theory", level: "A", prompt: "Сколько залогов обычно выделяют?", options: ["два", "три", "один", "четыре"], correct: 0, answerText: "два" } },
+  { sub: "zalog", q: { id: "zl-t3", type: "single", mode: "theory", level: "A", prompt: "Действительный залог — это когда предмет…", options: ["сам выполняет действие", "испытывает действие", "не действует", "отсутствует"], correct: 0, answerText: "сам выполняет действие" } },
+  { sub: "zalog", q: { id: "zl-t4", type: "single", mode: "theory", level: "A", prompt: "Страдательный залог — это когда над предметом…", options: ["выполняют действие", "предмет сам действует", "действия нет", "действие в будущем"], correct: 0, answerText: "выполняют действие" } },
+  { sub: "zalog", q: { id: "zl-t5", type: "single", mode: "theory", level: "B", prompt: "«Рабочие строят дом» — какой залог?", options: ["действительный", "страдательный", "оба", "нельзя определить"], correct: 0, answerText: "действительный" } },
+  { sub: "zalog", q: { id: "zl-t6", type: "single", mode: "theory", level: "B", prompt: "«Дом строится рабочими» — какой залог?", options: ["страдательный", "действительный", "оба", "нельзя определить"], correct: 0, answerText: "страдательный" } },
+  { sub: "zalog", q: { id: "zl-t7", type: "single", mode: "theory", level: "C", prompt: "Страдательный залог часто выражают глаголы…", options: ["возвратные (на -ся)", "в повелительном наклонении", "будущего времени", "совершенного вида"], correct: 0, answerText: "возвратные (на -ся)" } },
+  { sub: "zalog", q: { id: "zl-t8", type: "single", mode: "theory", level: "C", prompt: "Краткое страдательное причастие (дом построен) выражает залог…", options: ["страдательный", "действительный", "оба", "никакой"], correct: 0, answerText: "страдательный" } },
+  { sub: "zalog", q: { id: "zl-t9", type: "single", mode: "theory", level: "B", prompt: "В действительном залоге подлежащее…", options: ["производит действие", "испытывает действие", "отсутствует", "всегда неодушевлённое"], correct: 0, answerText: "производит действие" } },
+  { sub: "zalog", q: { id: "zl-t10", type: "single", mode: "theory", level: "B", prompt: "Можно ли одну мысль выразить двумя залогами?", options: ["да", "нет", "только в прошедшем", "только в будущем"], correct: 0, answerText: "да" } },
+  { sub: "zalog", q: { id: "zl-p1", type: "single", mode: "practice", level: "B", prompt: "Укажите предложение с действительным залогом.", options: ["Ученик решает задачу.", "Задача решается учеником.", "Задача решена.", "Дом построен."], correct: 0, answerText: "Ученик решает задачу." } },
+  { sub: "zalog", q: { id: "zl-p2", type: "single", mode: "practice", level: "B", prompt: "Укажите предложение со страдательным залогом.", options: ["Дом строится рабочими.", "Рабочие строят дом.", "Рабочие построили дом.", "Рабочие работают."], correct: 0, answerText: "Дом строится рабочими." } },
+  { sub: "zalog", q: { id: "zl-p3", type: "single", mode: "practice", level: "A", prompt: "«Мама моет посуду» — какой залог?", options: ["действительный", "страдательный", "оба", "нельзя определить"], correct: 0, answerText: "действительный" } },
+  { sub: "zalog", q: { id: "zl-p4", type: "single", mode: "practice", level: "A", prompt: "«Посуда моется мамой» — какой залог?", options: ["страдательный", "действительный", "оба", "нельзя определить"], correct: 0, answerText: "страдательный" } },
+  { sub: "zalog", q: { id: "zl-p5", type: "single", mode: "practice", level: "B", prompt: "«Письмо написано учеником» — какой залог?", options: ["страдательный", "действительный", "оба", "нельзя определить"], correct: 0, answerText: "страдательный" } },
+  { sub: "zalog", q: { id: "zl-p6", type: "multi", mode: "practice", level: "C", prompt: "Отметьте предложения со страдательным залогом.", options: ["Книга читается всеми.", "Дети читают книгу.", "Задача решается быстро.", "Он решает пример.", "Дом построен строителями.", "Мастер чинит часы."], correct: [0, 2, 4], answerText: "Книга читается всеми; Задача решается быстро; Дом построен строителями" } },
+  { sub: "zalog", q: { id: "zl-p7", type: "single", mode: "practice", level: "C", prompt: "Преобразуйте в страдательный: «Строители построили мост».", options: ["Мост построен строителями.", "Строители строят мост.", "Мост строят.", "Строители построят мост."], correct: 0, answerText: "Мост построен строителями." } },
+  { sub: "zalog", q: { id: "zl-p8", type: "single", mode: "practice", level: "B", prompt: "«Картина нарисована художником» — какой залог?", options: ["страдательный", "действительный", "оба", "нельзя определить"], correct: 0, answerText: "страдательный" } },
+  { sub: "zalog", q: { id: "zl-p9", type: "single", mode: "practice", level: "B", prompt: "В каком предложении предмет сам выполняет действие?", options: ["Кот ловит мышь.", "Мышь поймана котом.", "Мышь ловится котом.", "Задача решена."], correct: 0, answerText: "Кот ловит мышь." } },
+  { sub: "zalog", q: { id: "zl-p10", type: "match", mode: "practice", level: "C", prompt: "Определите залог.", lefts: ["Рабочие строят дом.", "Дом строится рабочими."], matchOptions: ["действительный", "страдательный", "оба", "нет залога"], matchCorrect: [0, 1], answerText: "первое — действительный, второе — страдательный" } },
+  // Глаголы движения (10/10)
+  { sub: "dvizhenie", q: { id: "dv-t1", type: "single", mode: "theory", level: "A", prompt: "Что называют глаголы движения?", options: ["перемещение в пространстве", "признак предмета", "количество", "состояние"], correct: 0, answerText: "перемещение в пространстве" } },
+  { sub: "dvizhenie", q: { id: "dv-t2", type: "single", mode: "theory", level: "A", prompt: "Глагол «идти» — какой?", options: ["однонаправленный", "разнонаправленный", "безличный", "возвратный"], correct: 0, answerText: "однонаправленный" } },
+  { sub: "dvizhenie", q: { id: "dv-t3", type: "single", mode: "theory", level: "A", prompt: "Глагол «ходить» — какой?", options: ["разнонаправленный", "однонаправленный", "безличный", "возвратный"], correct: 0, answerText: "разнонаправленный" } },
+  { sub: "dvizhenie", q: { id: "dv-t4", type: "single", mode: "theory", level: "B", prompt: "Однонаправленные глаголы обозначают движение…", options: ["в одну сторону, в один момент", "туда и обратно", "вообще", "отсутствие движения"], correct: 0, answerText: "в одну сторону, в один момент" } },
+  { sub: "dvizhenie", q: { id: "dv-t5", type: "single", mode: "theory", level: "B", prompt: "Разнонаправленные глаголы обозначают движение…", options: ["туда-сюда, регулярное", "в одну сторону сейчас", "отсутствие движения", "только в будущем"], correct: 0, answerText: "туда-сюда, регулярное" } },
+  { sub: "dvizhenie", q: { id: "dv-t6", type: "single", mode: "theory", level: "A", prompt: "Пара к глаголу «ехать»:", options: ["ездить", "идти", "бежать", "лететь"], correct: 0, answerText: "ездить" } },
+  { sub: "dvizhenie", q: { id: "dv-t7", type: "single", mode: "theory", level: "A", prompt: "Пара к глаголу «лететь»:", options: ["летать", "ходить", "плавать", "бегать"], correct: 0, answerText: "летать" } },
+  { sub: "dvizhenie", q: { id: "dv-t8", type: "single", mode: "theory", level: "A", prompt: "Пара к глаголу «плыть»:", options: ["плавать", "ходить", "бегать", "ездить"], correct: 0, answerText: "плавать" } },
+  { sub: "dvizhenie", q: { id: "dv-t9", type: "single", mode: "theory", level: "C", prompt: "«Я хожу в бассейн по вторникам» — глагол…", options: ["разнонаправленный (регулярно)", "однонаправленный", "безличный", "будущего времени"], correct: 0, answerText: "разнонаправленный (регулярно)" } },
+  { sub: "dvizhenie", q: { id: "dv-t10", type: "single", mode: "theory", level: "B", prompt: "Глаголы движения образуют…", options: ["пары (идти — ходить)", "тройки", "не образуют пар", "только формы времени"], correct: 0, answerText: "пары (идти — ходить)" } },
+  { sub: "dvizhenie", q: { id: "dv-p1", type: "single", mode: "practice", level: "A", prompt: "Укажите однонаправленный глагол движения.", options: ["идти", "ходить", "ездить", "бегать"], correct: 0, answerText: "идти" } },
+  { sub: "dvizhenie", q: { id: "dv-p2", type: "single", mode: "practice", level: "A", prompt: "Укажите разнонаправленный глагол движения.", options: ["ходить", "идти", "ехать", "лететь"], correct: 0, answerText: "ходить" } },
+  { sub: "dvizhenie", q: { id: "dv-p3", type: "single", mode: "practice", level: "A", prompt: "Пара к «бежать»:", options: ["бегать", "ходить", "плавать", "ездить"], correct: 0, answerText: "бегать" } },
+  { sub: "dvizhenie", q: { id: "dv-p4", type: "single", mode: "practice", level: "B", prompt: "«Сейчас я иду домой» — глагол…", options: ["однонаправленный", "разнонаправленный", "безличный", "возвратный"], correct: 0, answerText: "однонаправленный" } },
+  { sub: "dvizhenie", q: { id: "dv-p5", type: "single", mode: "practice", level: "B", prompt: "«Птицы летают высоко» — глагол…", options: ["разнонаправленный", "однонаправленный", "безличный", "будущего времени"], correct: 0, answerText: "разнонаправленный" } },
+  { sub: "dvizhenie", q: { id: "dv-p6", type: "multi", mode: "practice", level: "C", prompt: "Отметьте однонаправленные глаголы.", options: ["идти", "ходить", "ехать", "ездить", "лететь", "летать"], correct: [0, 2, 4], answerText: "идти, ехать, лететь" } },
+  { sub: "dvizhenie", q: { id: "dv-p7", type: "single", mode: "practice", level: "B", prompt: "Вставьте однонаправленный: «Смотри, автобус … к остановке».", options: ["едет", "ездит", "ходит", "бегает"], correct: 0, answerText: "едет" } },
+  { sub: "dvizhenie", q: { id: "dv-p8", type: "single", mode: "practice", level: "B", prompt: "Вставьте разнонаправленный: «Он каждый день … на работу».", options: ["ходит", "идёт", "плывёт", "летит"], correct: 0, answerText: "ходит" } },
+  { sub: "dvizhenie", q: { id: "dv-p9", type: "single", mode: "practice", level: "B", prompt: "Пара к «нести»:", options: ["носить", "водить", "возить", "ходить"], correct: 0, answerText: "носить" } },
+  { sub: "dvizhenie", q: { id: "dv-p10", type: "match", mode: "practice", level: "C", prompt: "Определите тип глагола движения.", lefts: ["идти", "ходить"], matchOptions: ["однонаправленный", "разнонаправленный", "безличный", "возвратный"], matchCorrect: [0, 1], answerText: "идти — однонаправленный, ходить — разнонаправленный" } },
+];
+EXTRA_VERB2.forEach(function (e) {
+  var t = TOPICS.filter(function (x) { return x.id === "verb"; })[0];
+  if (!t) return;
+  var st = t.subtopics.filter(function (s) { return s.id === e.sub; })[0];
+  if (st) st.questions.push(e.q);
+});
+
 // ── Схемы к правилам (возвращают HTML) ────────────────────────
 function scheme(id) {
   if (id === "vidy") {
@@ -1956,53 +2089,14 @@ function buildQuiz(topic, opts) {
 }
 
 // ── Состояние ─────────────────────────────────────────────────
-var TEACHER_EMAIL = "mazhidova.makka4@gmail.com";
-
 var S = {
   screen: "home", topic: null, mode: "both", count: 10, selectedSubs: [],
   quiz: [], qi: 0, results: [], seenIds: [], retrained: false,
   sel: null, multi: [], match: [], checked: false, correct: false,
   attempts: 0, revealed: false, resolved: false, skipped: false,
-  appealOpen: false, appealDone: false,
 };
 var root = document.getElementById("root");
 
-// ── Сбор апелляций и предложений (локально + письмо учителю) ───
-function saveLocal(key, obj) {
-  try {
-    var k = "rt_" + key;
-    var arr = JSON.parse(localStorage.getItem(k) || "[]");
-    obj.date = new Date().toISOString();
-    arr.push(obj);
-    localStorage.setItem(k, JSON.stringify(arr));
-  } catch (e) {}
-}
-function mailFeedback(subject, body) {
-  try { window.location.href = "mailto:" + TEACHER_EMAIL + "?subject=" + encodeURIComponent(subject) + "&body=" + encodeURIComponent(body); } catch (e) {}
-}
-
-// ── Google-форма (заполните 4 значения — тогда ответы падают в вашу таблицу) ──
-var FEEDBACK = {
-  formAction: "https://docs.google.com/forms/d/e/1FAIpQLSc5iEd5l5bAnTQFJcqzvy5hCQYK0irkRUolu2zD8rdlLSGfgg/formResponse",
-  entryType: "entry.622994127",    // поле «Тип» (Апелляция / ҰСЫНЫС)
-  entryText: "entry.1751592771",   // поле «Текст»
-  entryMeta: "entry.348490033",    // поле «Детали»
-};
-function sendFeedback(kind, text, meta) {
-  saveLocal(kind === "Апелляция" ? "appeal" : "suggest", { kind: kind, text: text, meta: meta || "" });
-  if (FEEDBACK.formAction && FEEDBACK.entryText) {
-    try {
-      var fd = new FormData();
-      if (FEEDBACK.entryType) fd.append(FEEDBACK.entryType, kind);
-      fd.append(FEEDBACK.entryText, text);
-      if (FEEDBACK.entryMeta) fd.append(FEEDBACK.entryMeta, meta || "");
-      fetch(FEEDBACK.formAction, { method: "POST", mode: "no-cors", body: fd });
-      return;
-    } catch (e) {}
-  }
-  // запасной вариант, пока форма не настроена — письмо на почту учителя
-  mailFeedback(kind + " — тренажёр по русскому", (meta ? meta + "\n\n" : "") + text);
-}
 function findSubtopic(id) { return S.topic && S.topic.subtopics.filter(function (s) { return s.id === id; })[0]; }
 function readySubs() { return S.topic ? S.topic.subtopics.filter(function (s) { return s.questions.length > 0; }) : []; }
 function curQ() { return S.quiz[S.qi]; }
@@ -2011,7 +2105,6 @@ function resetAnswer() {
   S.sel = null; S.multi = []; S.match = [];
   S.checked = false; S.correct = false;
   S.attempts = 0; S.revealed = false; S.resolved = false; S.skipped = false;
-  S.appealOpen = false; S.appealDone = false;
 }
 function openTopic(t) {
   S.topic = t; S.mode = "both"; S.count = 10;
@@ -2100,7 +2193,6 @@ function render() {
   else if (S.screen === "setup") h += viewSetup();
   else if (S.screen === "quiz") h += viewQuiz();
   else if (S.screen === "result") h += viewResult();
-  else if (S.screen === "suggest") h += viewSuggest();
 
   root.innerHTML = h;
   wire();
@@ -2116,22 +2208,6 @@ function viewHome() {
       '<div class="name">' + esc(t.title) + '</div>' +
       '<div class="meta">' + (ready ? "готово · начать" : "скоро") + '</div></button>';
   });
-  h += '</div>';
-  h += '<button class="rt-suggest-link" data-act="suggest">✍ ҰСЫНЫС — оставить предложение или идею</button>';
-  return h;
-}
-
-function viewSuggest() {
-  var h = '<h1 class="rt-h1">ҰСЫНЫС</h1>';
-  h += '<p class="rt-lead">Напишите, что хотите улучшить в тренажёре: какие темы добавить, что исправить, какие задания нужны. Учитель прочитает все предложения.</p>';
-  h += '<div class="rt-card">';
-  h += '<div class="rt-setup-h" style="margin-top:0">Ваше имя (необязательно)</div>';
-  h += '<input class="rt-input" id="suggest-name" placeholder="Например: Айгерим, 11 класс">';
-  h += '<div class="rt-setup-h">Ваше предложение</div>';
-  h += '<textarea class="rt-ta" id="suggest-text" placeholder="Напишите свою идею или что нужно исправить…"></textarea>';
-  h += '<div class="rt-appeal-err" id="suggest-err"></div>';
-  if (S.suggestDone) h += '<div class="rt-appeal-done">✓ Спасибо! Ваше предложение отправлено.</div>';
-  h += '<button class="rt-start" data-suggest-send>Отправить предложение</button>';
   h += '</div>';
   return h;
 }
@@ -2257,22 +2333,6 @@ function viewQuiz() {
   }
   h += '</div>';
 
-  // Апелляция на вопрос
-  h += '<div class="rt-appeal">';
-  if (S.appealDone) {
-    h += '<div class="rt-appeal-done">✓ Апелляция отправлена. Учитель её рассмотрит.</div>';
-  } else if (!S.appealOpen) {
-    h += '<button class="rt-appeal-toggle" data-appeal-open>⚑ Апелляция — сообщить об ошибке в вопросе</button>';
-  } else {
-    h += '<div class="rt-appeal-box">' +
-      '<div class="rt-appeal-h">Апелляция на этот вопрос</div>' +
-      '<textarea class="rt-ta" id="appeal-text" placeholder="Напишите, что, по-вашему, не так с вопросом или ответом…"></textarea>' +
-      '<div class="rt-appeal-err" id="appeal-err"></div>' +
-      '<div class="rt-appeal-btns"><button class="rt-btn ghost" data-appeal-cancel>Отмена</button><button class="rt-btn" data-appeal-send>Отправить</button></div>' +
-      '</div>';
-  }
-  h += '</div>';
-
   h += '</div>';
   return h;
 }
@@ -2324,7 +2384,6 @@ function wire() {
       var a = el.getAttribute("data-act");
       if (a === "home") { S.screen = "home"; render(); }
       else if (a === "setup") { S.screen = "setup"; render(); }
-      else if (a === "suggest") { S.suggestDone = false; S.screen = "suggest"; render(); }
     });
   });
 
@@ -2375,32 +2434,6 @@ function wire() {
   var rb = root.querySelector("[data-retry]"); if (rb) rb.addEventListener("click", retry);
   var sb = root.querySelector("[data-skip]"); if (sb) sb.addEventListener("click", skip);
   var tb = root.querySelector("[data-retrain]"); if (tb) tb.addEventListener("click", retrainWeak);
-
-  // Апелляция
-  var ao = root.querySelector("[data-appeal-open]"); if (ao) ao.addEventListener("click", function () { S.appealOpen = true; render(); });
-  var ac = root.querySelector("[data-appeal-cancel]"); if (ac) ac.addEventListener("click", function () { S.appealOpen = false; render(); });
-  var as = root.querySelector("[data-appeal-send]");
-  if (as) as.addEventListener("click", function () {
-    var ta = document.getElementById("appeal-text");
-    var txt = ta ? ta.value.trim() : "";
-    if (!txt) { var er = document.getElementById("appeal-err"); if (er) er.textContent = "Сначала напишите текст апелляции."; return; }
-    var q = curQ();
-    var meta = "Тема: " + (S.topic ? S.topic.title : "") + " / " + q.subtopicTitle + "\nВопрос (" + q.id + "): " + q.prompt;
-    sendFeedback("Апелляция", txt, meta);
-    S.appealOpen = false; S.appealDone = true; render();
-  });
-
-  // ҰСЫНЫС
-  var ss = root.querySelector("[data-suggest-send]");
-  if (ss) ss.addEventListener("click", function () {
-    var t = document.getElementById("suggest-text");
-    var n = document.getElementById("suggest-name");
-    var txt = t ? t.value.trim() : "";
-    var name = n ? n.value.trim() : "";
-    if (!txt) { var er = document.getElementById("suggest-err"); if (er) er.textContent = "Сначала напишите предложение."; return; }
-    sendFeedback("ҰСЫНЫС", txt, name ? "От: " + name : "");
-    S.suggestDone = true; render();
-  });
 }
 
 render();
